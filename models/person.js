@@ -5,12 +5,9 @@ var Schema = mongoose.Schema;
 
 var personSchema = new Schema({
 	name: String,
-	itpYear: Number,
-	interests: [String],
-	link: String,
 	imageUrl: String,
 	slug : { type: String, lowercase: true, required: true, unique: true },
-	hasGlasses: Boolean,
+
 	dateAdded : { type: Date, default: Date.now }
 })
 

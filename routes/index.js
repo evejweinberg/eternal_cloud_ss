@@ -32,24 +32,32 @@ router.get('/', function(req, res) {
   console.log('home page requested!');
 
   var jsonData = {
-  	'name': 'itp-directory',
+  	'name': 'user-directory',
   	'api-status':'OK'
   }
 
+  // res.send('hi')
+
   // respond with json data
-  //res.json(jsonData)
+  // res.json(jsonData)
 
   // respond by redirecting
-  //res.redirect('/directory')
+  res.redirect('/directory')
 
   // respond with html
-  res.render('directory.html')
+  // res.render('directory.html')
 
 });
 
 router.get('/add-person', function(req,res){
 
   res.render('add.html')
+
+})
+
+router.get('/make-profile', function(req,res){
+
+  res.render('makeProfile.html')
 
 })
 
@@ -79,7 +87,7 @@ router.get('/edit/:id', function(req,res){
       return res.json(err)
     }
 
-    console.log(data); 
+    console.log(data);
 
     var viewData = {
       pageTitle: "Edit " + data.name,
@@ -107,8 +115,12 @@ router.get('/edit/:id', function(req,res){
 
 router.get('/edit/:id', function(req,res){
 
+  //get the id
+
   var requestedId = req.params.id;
 
+
+//ask database for information
   Person.findById(requestedId,function(err,data){
     if(err){
       var error = {
@@ -122,7 +134,7 @@ router.get('/edit/:id', function(req,res){
       status: "OK",
       person: data
     }
-
+//views > edit.html
     return res.render('edit.html',viewData);
   })
 
@@ -131,24 +143,32 @@ router.get('/edit/:id', function(req,res){
 
 router.post('/api/create', function(req,res){
 
+  // if (!req.body.name){
+  //   //return an error
+  // }
+  console.log('in api/create, and we got data');
   console.log(req.body);
 
+
+//save a data object
   var personObj = {
+    //grab your mongood schema and double it here
     name: req.body.name,
-    itpYear: req.body.itpYear,
-    interests: req.body.interests.split(','),
-    link: req.body.link,
     imageUrl: req.body.imageUrl,
+    //create a uniqur slug
     slug : req.body.name.toLowerCase().replace(/[^\w ]+/g,'').replace(/ +/g,'-')
   }
 
-  if (req.body.hasGlasses == 'yes') personObj['hasGlasses'] = true;
-  else personObj['hasGlasses'] = false;
 
+
+  //save to the database, send through the attributes as a json.
   var person = new Person(personObj);
-
+//mongood database operation, save to database, and have database hit this callback
   person.save(function(err,data){
     if(err){
+      //this shows up to client side app
+      //so we could redirect them
+      // res.redirect('add/person')
       var error = {
         status: "ERROR",
         message: err
@@ -161,7 +181,11 @@ router.post('/api/create', function(req,res){
       person: data
     }
 
-    return res.json(jsonData);
+    // console.log(data)
+    // res.json(data)
+
+    // return res.json(jsonData);
+    res.redict('/directory')
 
   })
 
@@ -227,7 +251,7 @@ router.post('/api/create/image', multipartMiddleware, function(req,res){
   var filename = req.files.image.name; // actual filename of file
   var path = req.files.image.path; // will be put into a temp directory
   var mimeType = req.files.image.type; // image/jpeg or actual mime type
-  
+
   // create a cleaned file name to store in S3
   // see cleanFileName function below
   var cleanedFileName = cleanFileName(filename);
@@ -237,7 +261,7 @@ router.post('/api/create/image', multipartMiddleware, function(req,res){
 
     // reference to the Amazon S3 Bucket
     var s3bucket = new AWS.S3({params: {Bucket: awsBucketName}});
-    
+
     // Set the bucket object properties
     // Key == filename
     // Body == contents of file
@@ -249,7 +273,7 @@ router.post('/api/create/image', multipartMiddleware, function(req,res){
       ACL: 'public-read',
       ContentType: mimeType
     };
-    
+
     // Put the above Object in the Bucket
     s3bucket.putObject(params, function(err, data) {
       if (err) {
@@ -279,7 +303,7 @@ router.post('/api/create/image', multipartMiddleware, function(req,res){
             person: data
           }
 
-          return res.json(jsonData);        
+          return res.json(jsonData);
         })
 
       }
@@ -291,27 +315,27 @@ router.post('/api/create/image', multipartMiddleware, function(req,res){
 })
 
 function cleanFileName (filename) {
-    
+
     // cleans and generates new filename for example userID=abc123 and filename="My Pet Dog.jpg"
     // will return "abc123_my_pet_dog.jpg"
     var fileParts = filename.split(".");
-    
+
     //get the file extension
     var fileExtension = fileParts[fileParts.length-1]; //get last part of file
-    
+
     //add time string to make filename a little more random
     d = new Date();
     timeStr = d.getTime();
-    
+
     //name without extension
     newFileName = fileParts[0];
-    
+
     return newFilename = timeStr + "_" + fileParts[0].toLowerCase().replace(/[^\w ]+/g,'').replace(/ +/g,'_') + "." + fileExtension;
-    
+
 }
 
 router.get('/api/get', function(req,res){
-
+//find all items
   Person.find(function(err,data){
 
       if(err){
@@ -353,10 +377,29 @@ router.get('/api/get/year/:itpYear',function(req,res){
         people: data
       }
 
-      return res.json(jsonData);    
+      return res.json(jsonData);
   })
 
 })
+
+router.get('/api/person/:slug'), function(req,res){
+  var reqestedSlug = req.params.slug;
+  console.log(reqestedSlug)
+  Person.findOne({slug:reqestedSlug}, function(err,data){
+    if (err){
+      return res.json({status: error})
+    }
+
+    if (!data || data ==null || data==''){
+
+    }
+
+    console.log('found that person')
+    console.log(data)
+    res.json(data)
+
+  })
+}
 
 // year, name
 // /api/get/query?year=2016&name=Sam&hasGlasses=true
@@ -377,7 +420,7 @@ router.get('/api/get/query',function(req,res){
 
   if(req.query.hasGlasses){
     searchQuery['hasGlasses'] =  req.query.hasGlasses
-  }  
+  }
 
   Person.find(searchQuery,function(err,data){
     res.json(data);
@@ -385,7 +428,7 @@ router.get('/api/get/query',function(req,res){
 
   // Person.find(searchQuery).sort('-name').exec(function(err,data){
   //   res.json(data);
-  // })  
+  // })
 
 
 })
@@ -393,10 +436,3 @@ router.get('/api/get/query',function(req,res){
 
 
 module.exports = router;
-
-
-
-
-
-
-
