@@ -8,7 +8,6 @@
 
 		<script src="js/three.js/Three.js"></script>
 		<script src="js/three.js/Detector.js"></script>
-		<!-- https://github.com/mrdoob/stats.js -->
 		<script src="js/three.js/Stats.js"></script>
 
 		<script src="js/threex/THREEx.screenshot.js"></script>
@@ -27,7 +26,7 @@
 
 	<script type="text/javascript">
 	var image_tex, video, buffer, pre_video_tex, video_tex, video_mat, video_mesh, video_geo, buffer_mat, buffer_geo, buffer_mesh;
-var newImage;
+	var newImage;
 	var ortho_width = 1920, ortho_height = 1080, ortho_near = -1, ortho_far = 1;
 
 	var get_webcam = function(){
@@ -127,11 +126,7 @@ var newImage;
 						.normalize().multiplyScalar(1.2);
 			scene.add( light );
 
-			var geometry	= new THREE.TorusGeometry( 1, 0.42, 16, 16 );
-			var material	= new THREE.MeshPhongMaterial({ambient: 0x808080, color: Math.random() * 0xffffff});
-			var mesh	= new THREE.Mesh( geometry, material );
-			// scene.add( mesh );
-			// console.log(mesh.position)
+
 
 			video_geo = new THREE.BoxGeometry( 30,30,30 );
 	video_mesh = new THREE.Mesh( video_geo, video_mat );
@@ -210,7 +205,7 @@ var newImage;
 
 	<div class="container">
 		<div class="row">
-			<div class="col-md-8">
+			<div class="col-md-3">
 				<h1>Become a Member</h1>
 <!-- validate this form!, look at bottom of this html -->
 				<form method="post" action="/api/create" id="myForm">
