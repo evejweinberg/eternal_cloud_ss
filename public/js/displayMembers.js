@@ -88,9 +88,7 @@ function renderPeeps(){
 		dataType : 'json',
 		success : function(response) {
 			console.log(response);
-
 			var people = response.people;
-
 			for(var i=0;i<people.length;i++){
 				// var htmlToAdd = '<div class="col-md-4">'+
         //
@@ -101,11 +99,9 @@ function renderPeeps(){
         //
 				// jQuery("#people-holder").append(htmlToAdd);
 
-
         var video_geo = new THREE.BoxGeometry( boxSize,boxSize,boxSize );
         var video_mat = new THREE.MeshPhongMaterial({
           color: 0xf3b7b7
-
           // map: people[i].imageURL
         })
     var video_mesh = new THREE.Mesh( video_geo, video_mat );

@@ -63,7 +63,7 @@ if(navigator.getUserMedia){
 
     // put a camera in the scene
     camera	= new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 1, 10000 );
-    camera.position.set(0, 0, 5);
+    camera.position.set(0, 0, 500);
     scene.add(camera);
 
     // create a camera contol
@@ -101,7 +101,10 @@ if(navigator.getUserMedia){
           .normalize().multiplyScalar(1.2);
     scene.add( light );
 
-
+var box = new THREE.BoxGeometry(30,30,30)
+var mat = new THREE.MeshPhongMaterial({color:0xb7b7b7})
+var mesh2 = new THREE.Mesh(box,mat)
+scene.add(mesh2)
 //
 //     video_geo = new THREE.BoxGeometry( 30,30,30 );
 // video_mesh = new THREE.Mesh( video_geo, video_mat );
@@ -157,6 +160,7 @@ if(navigator.getUserMedia){
   			console.log(response);
   			var people = response.people;
   			for(var i=0;i<people.length;i++){
+          console.log(people[i])
   				// var htmlToAdd = '<div class="col-md-4">'+
           //
   				// 	'<h1>'+people[i].name+'</h1>'+
@@ -167,14 +171,17 @@ if(navigator.getUserMedia){
   				// jQuery("#people-holder").append(htmlToAdd);
 
           var video_geo = new THREE.BoxGeometry( boxSize,boxSize,boxSize );
+          //i need to add the image of the person here
           var video_mat = new THREE.MeshPhongMaterial({
             color: 0xf3b7b7
-            // map: people[i].imageURL
+
+            map: people[i].imageURL
           })
       var video_mesh = new THREE.Mesh( video_geo, video_mat );
       video_mesh.position.x = i*boxSize+60
       video_mesh.position.y = i*60
       allMembers.push(video_mesh)
+      allMembers[i].material.map = people[i].imageURL
 
       scene.add(allMembers[i]);
   			}
