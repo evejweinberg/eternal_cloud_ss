@@ -3,9 +3,55 @@ var image_tex, video, buffer, pre_video_tex, video_tex, video_mat, video_mesh, v
 var ortho_width = 1920, ortho_height = 1080, ortho_near = -1, ortho_far = 1;
 var boxSize = 20;
 var allMembers = [];
+var loadingManager = new THREE.LoadingManager();
+var personTexture
 
-var get_webcam = function(){
-};
+loadingManager.onProgress = function(item, loaded, total){
+
+  //Loading precentage pattern
+  console.log(loaded / total * 100 + '%');
+
+}
+
+//Signify loading done
+loadingManager.onLoad = function(){
+
+  //get rid of the loading screen
+
+  //Start redrawing when the models are done loading
+  init()
+
+}
+
+var loader2 = new THREE.TextureLoader(loadingManager);
+    loader2.load('../img/leo.jpg', onTextureLoaded2);
+
+    loader2.anisotropy = 4;
+    // loader2.repeat.set( 0.998, 0.998 );
+    // loader2.offset.set( 0.001, 0.001 );
+    loader2.wrapS = loader2.wrapT = THREE.RepeatWrapping;
+    loader2.format = THREE.RGBFormat;
+    // loader2.repeat.set(512, 512);
+    function onTextureLoaded2(texture) {
+
+        personTexture = new THREE.MeshPhongMaterial({
+            roughness: .64,
+            metalness: .81,
+            transparent: false,
+            opacity: 1,
+            color: pink,
+            map: texture,
+            side: THREE.DoubleSide
+        });
+
+
+
+    } //////////DONE LOADING FLOOR //////////
+
+
+
+
+
   var stats, scene, renderer, composer;
   var camera, cameraControls;
 
@@ -147,10 +193,9 @@ var get_webcam = function(){
           //i need to add the image of the person here
           var video_mat = new THREE.MeshPhongMaterial({
             color: 0xf3b7b7
-
             // map: people[i].imageURL
           })
-          var video_mesh = new THREE.Mesh( video_geo, video_mat );
+          var video_mesh = new THREE.Mesh( video_geo, personTexture );
 
           video_mesh.position.x = -60 + ((i%3)*60)
           if (i%3 == 0){
