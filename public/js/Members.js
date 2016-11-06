@@ -4,7 +4,10 @@ var ortho_width = 1920, ortho_height = 1080, ortho_near = -1, ortho_far = 1;
 var boxSize = 20;
 var allMembers = [];
 var loadingManager = new THREE.LoadingManager();
-var personTexture
+var personTexture;
+var stats, scene, renderer, composer;
+var camera, cameraControls;
+var movePeopleDown = 120;
 
 loadingManager.onProgress = function(item, loaded, total){
 
@@ -15,24 +18,21 @@ loadingManager.onProgress = function(item, loaded, total){
 
 //Signify loading done
 loadingManager.onLoad = function(){
-
-  //get rid of the loading screen
-
-  //Start redrawing when the models are done loading
+  //Start the scene when the models are done loading
   init()
 
 }
 
 var loader2 = new THREE.TextureLoader(loadingManager);
+//callback function
     loader2.load('../img/leo.jpg', onTextureLoaded2);
 
     loader2.anisotropy = 4;
-    // loader2.repeat.set( 0.998, 0.998 );
-    // loader2.offset.set( 0.001, 0.001 );
     loader2.wrapS = loader2.wrapT = THREE.RepeatWrapping;
     loader2.format = THREE.RGBFormat;
-    // loader2.repeat.set(512, 512);
     function onTextureLoaded2(texture) {
+
+      console.log(texture)
 
         personTexture = new THREE.MeshPhongMaterial({
             roughness: .64,
@@ -46,24 +46,20 @@ var loader2 = new THREE.TextureLoader(loadingManager);
 
 
 
-    } //////////DONE LOADING FLOOR //////////
+    } //////////DONE LOADING IMAGE//////////
 
 
 
-
-
-  var stats, scene, renderer, composer;
-  var camera, cameraControls;
 
   if( !init() )	animate();
 
-  // init the scene
+
   function init(){
-    // get_webcam();
+
 
     if( Detector.webgl ){
       renderer = new THREE.WebGLRenderer({
-        alpha:true,
+        alpha: true,
         antialias		: true,	// to get smoother output
         preserveDrawingBuffer	: true	// to allow screenshot
       });
@@ -75,7 +71,6 @@ var loader2 = new THREE.TextureLoader(loadingManager);
     renderer.setSize( window.innerWidth, window.innerHeight );
     document.getElementById('container').appendChild(renderer.domElement);
 
-    // add Stats.js - https://github.com/mrdoob/stats.js
     stats = new Stats();
     stats.domElement.style.position	= 'absolute';
     stats.domElement.style.bottom	= '0px';
@@ -124,20 +119,15 @@ var loader2 = new THREE.TextureLoader(loadingManager);
           .normalize().multiplyScalar(1.2);
     scene.add( light );
 
-  // var box = new THREE.BoxGeometry(30,30,30)
-  // var mat = new THREE.MeshPhongMaterial({color:0xb7b7b7})
-  // var mesh2 = new THREE.Mesh(box,mat)
-  // scene.add(mesh2)
-
 
   renderPeeps();
 
   }
-  var movePeopleDown = 120;
+
+
 
   // animation loop
   function animate() {
-    // loop on request animation loop
     // - it has to be at the begining of the function
     // - see details at http://my.opera.com/emoller/blog/2011/12/20/requestanimationframe-for-smart-er-animating
     requestAnimationFrame( animate );
@@ -195,6 +185,8 @@ var loader2 = new THREE.TextureLoader(loadingManager);
             color: 0xf3b7b7
             // map: people[i].imageURL
           })
+          console.log('person Texture is '+ personTexture)
+          if (personTexture)
           var video_mesh = new THREE.Mesh( video_geo, personTexture );
 
           video_mesh.position.x = -60 + ((i%3)*60)
