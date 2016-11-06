@@ -5,30 +5,6 @@ var boxSize = 20;
 var allMembers = [];
 
 var get_webcam = function(){
-// video = document.createElement('video');
-// video.width = ortho_width;
-// video.height = ortho_width;
-// video.autoplay = true;
-// video.muted = true; //- to prevent create feedback from mic input ***
-// video_tex = new THREE.Texture( video );
-    // image_tex = new THREE.TextureLoader().load('src/logo.png');
-    // video_tex.minFilter = THREE.LinearFilter //- to use non powers of two image
-    // image_tex.minFilter = THREE.LinearFilter
-
-    // video_mat = new THREE.MeshPhongMaterial(
-    //   {map: video_tex}
-    //
-    // );
-if(navigator.getUserMedia){
-  navigator.getUserMedia({ audio: true, video:{ width: ortho_width, height: ortho_height, facingMode: { exact: "environment" } } }, function(stream){
-    // video.src = window.URL.createObjectURL(stream);
-    // video.play();
-  }, function(err){
-    console.log('failed to get a steram : ', err );
-  });
-} else {
-  console.log('user media is not supported');
-}
 };
   var stats, scene, renderer, composer;
   var camera, cameraControls;
@@ -41,10 +17,11 @@ if(navigator.getUserMedia){
 
     if( Detector.webgl ){
       renderer = new THREE.WebGLRenderer({
+        alpha:true,
         antialias		: true,	// to get smoother output
         preserveDrawingBuffer	: true	// to allow screenshot
       });
-      renderer.setClearColor( 0xbbbbbb );
+      renderer.setClearColor( 0xbbbbbb,0 );
     }else{
       Detector.addGetWebGLMessage();
       return true;
@@ -63,7 +40,7 @@ if(navigator.getUserMedia){
 
     // put a camera in the scene
     camera	= new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 1, 10000 );
-    camera.position.set(0, 0, 500);
+    camera.position.set(0, 0, 300);
     scene.add(camera);
 
     // create a camera contol
@@ -101,24 +78,19 @@ if(navigator.getUserMedia){
           .normalize().multiplyScalar(1.2);
     scene.add( light );
 
-var box = new THREE.BoxGeometry(30,30,30)
-var mat = new THREE.MeshPhongMaterial({color:0xb7b7b7})
-var mesh2 = new THREE.Mesh(box,mat)
-scene.add(mesh2)
-//
-//     video_geo = new THREE.BoxGeometry( 30,30,30 );
-// video_mesh = new THREE.Mesh( video_geo, video_mat );
-//
-// scene.add(video_mesh);
+  // var box = new THREE.BoxGeometry(30,30,30)
+  // var mat = new THREE.MeshPhongMaterial({color:0xb7b7b7})
+  // var mesh2 = new THREE.Mesh(box,mat)
+  // scene.add(mesh2)
+
 
   renderPeeps();
 
   }
+  var movePeopleDown = 120;
 
   // animation loop
   function animate() {
-    // if(video.readyState === video.HAVE_ENOUGH_DATA) { video_tex.needsUpdate = true; }
-
     // loop on request animation loop
     // - it has to be at the begining of the function
     // - see details at http://my.opera.com/emoller/blog/2011/12/20/requestanimationframe-for-smart-er-animating
@@ -142,8 +114,8 @@ scene.add(mesh2)
     // animation of all objects
     scene.traverse(function(object3d, i){
       if( object3d instanceof THREE.Mesh === false )	return
-      // object3d.rotation.y = PIseconds*0.0003 * (i % 2 ? 1 : -1);
-      // object3d.rotation.x = PIseconds*0.0002 * (i % 2 ? 1 : -1);
+      object3d.rotation.y = PIseconds*0.0003 * (i % 2 ? 1 : -1);
+      object3d.rotation.x = PIseconds*0.0002 * (i % 2 ? 1 : -1);
     })
 
     // actually render the scene
@@ -171,19 +143,27 @@ scene.add(mesh2)
   				// jQuery("#people-holder").append(htmlToAdd);
 
           var video_geo = new THREE.BoxGeometry( boxSize,boxSize,boxSize );
+
           //i need to add the image of the person here
           var video_mat = new THREE.MeshPhongMaterial({
             color: 0xf3b7b7
 
             // map: people[i].imageURL
           })
-      var video_mesh = new THREE.Mesh( video_geo, video_mat );
-      video_mesh.position.x = i*boxSize+60
-      video_mesh.position.y = i*60
-      allMembers.push(video_mesh)
-      allMembers[i].material.map = people[i].imageURL
+          var video_mesh = new THREE.Mesh( video_geo, video_mat );
 
-      scene.add(allMembers[i]);
+          video_mesh.position.x = -60 + ((i%3)*60)
+          if (i%3 == 0){
+            console.log('move down')
+            movePeopleDown -=60
+            video_mesh.position.y = movePeopleDown
+          } else {
+            video_mesh.position.y = movePeopleDown
+          }
+          allMembers.push(video_mesh)
+          allMembers[i].material.map = people[i].imageURL
+          console.log(allMembers[i].position.x, allMembers[i].position.y)
+          scene.add(allMembers[i]);
   			}
 
 
