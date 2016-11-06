@@ -36,6 +36,7 @@ loadingManager.onLoad = function(){
 
 
 
+//first I tried this, but didn't work, so now i'm trying to do it in init()
 
     // function onTextureLoaded2(texture) {
     //
@@ -63,8 +64,9 @@ loadingManager.onLoad = function(){
 
 
   function init(){
+    //create a loader
     var loader2 = new THREE.TextureLoader(loadingManager);
-
+    //load the texture, and whwen it's done, push it into a Phong material
     var texture1 = loader2.load( "../img/leo.jpg", function(){
       //why is this texture 1 not coming through?
       console.log(texture1)
