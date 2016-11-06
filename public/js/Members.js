@@ -4,7 +4,7 @@ var boxSize = 20;
 var allMembers = [];
 var personTexture;
 var stats, scene, renderer, composer;
-var camera, cameraControls, material1;
+var camera, cameraControls, material1, mesh;
 var movePeopleDown = 120;
 
 //////DONA LOADING VARIABLES ///////////
@@ -19,12 +19,14 @@ loadingManager.onProgress = function(item, loaded, total){
 
 //Signify loading done
 loadingManager.onLoad = function(){
-  console.log('all elements loaded')
+  // console.log('all elements loaded')
 
   //Start the scene when the models are done loading
-  init()
+      animate();
 
 }
+
+init()
 
 //this works, so I know the image path is correct
 // var img = document.createElement('img');
@@ -60,17 +62,20 @@ loadingManager.onLoad = function(){
 
 
 
-  if( !init() )	animate();
+
+
+
 
 
   function init(){
     //create a loader
     var loader2 = new THREE.TextureLoader(loadingManager);
     //load the texture, and whwen it's done, push it into a Phong material
-    var texture1 = loader2.load( "../img/leo.jpg", function(){
+    loader2.load( "../img/leo.jpg", function(texture){
       //why is this texture 1 not coming through?
-      console.log(texture1)
-      material1 = new THREE.MeshPhongMaterial( { color: 0xffffff, map: texture1 } );
+      console.log(texture)
+      material1 = new THREE.MeshBasicMaterial( { map: texture } );
+      console.log(material1)
 
     })
 
@@ -89,7 +94,7 @@ loadingManager.onLoad = function(){
       return true;
     }
     renderer.setSize( window.innerWidth, window.innerHeight );
-    document.getElementById('container').appendChild(renderer.domElement);
+    document.body.appendChild(renderer.domElement);
 
     stats = new Stats();
     stats.domElement.style.position	= 'absolute';
@@ -101,6 +106,7 @@ loadingManager.onLoad = function(){
 
     // put a camera in the scene
     camera	= new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 1, 10000 );
+    //this is a good Z-depth to see the cubes
     camera.position.set(0, 0, 300);
     scene.add(camera);
 
@@ -108,14 +114,14 @@ loadingManager.onLoad = function(){
     cameraControls	= new THREE.TrackballControls( camera )
 
     // transparently support window resize
-    THREEx.WindowResize.bind(renderer, camera);
-    // allow 'p' to make screenshot
-    THREEx.Screenshot.bindKey(renderer);
-    // allow 'f' to go fullscreen where this feature is supported
-    if( THREEx.FullScreen.available() ){
-      THREEx.FullScreen.bindKey();
-      // document.getElementById('inlineDoc').innerHTML	+= "- <i>f</i> for fullscreen";
-    }
+    // THREEx.WindowResize.bind(renderer, camera);
+    // // allow 'p' to make screenshot
+    // THREEx.Screenshot.bindKey(renderer);
+    // // allow 'f' to go fullscreen where this feature is supported
+    // if( THREEx.FullScreen.available() ){
+    //   THREEx.FullScreen.bindKey();
+    //   // document.getElementById('inlineDoc').innerHTML	+= "- <i>f</i> for fullscreen";
+    // }
 
     // LOTS OF LIGHTS
     var light	= new THREE.AmbientLight( Math.random() * 0xffffff );
@@ -137,6 +143,14 @@ loadingManager.onLoad = function(){
     light.position.set( Math.random()-0.5, Math.random()-0.5, Math.random()-0.5 )
           .normalize().multiplyScalar(1.2);
     scene.add( light );
+
+
+    //does one cube load? YES!
+    // var geo = new THREE.BoxGeometry(30,30,30)
+    // var mat = new THREE.MeshBasicMaterial({color: 0xb7b7b7})
+    // mesh = new THREE.Mesh(geo, mat)
+    // scene.add(mesh)
+    // mesh.position.z = -80
 
 
   renderPeeps();
@@ -197,7 +211,7 @@ loadingManager.onLoad = function(){
           })
 
           //why is thr map: undefined on this material?
-          console.log(material1)
+          // console.log(material1)
 
           //make a cube for each person
           var video_mesh = new THREE.Mesh( video_geo, material1 );
