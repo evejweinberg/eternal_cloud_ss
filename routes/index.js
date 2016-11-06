@@ -58,9 +58,9 @@ router.get('/add-person', function(req,res){
 
 })
 
-router.get('/make-profile', function(req,res){
+router.get('/login', function(req,res){
 
-  res.render('makeProfile.html')
+  res.render('login.html')
 
 })
 
