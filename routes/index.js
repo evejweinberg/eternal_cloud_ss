@@ -143,6 +143,12 @@ router.get('/edit/:id', function(req,res){
 
 })
 
+router.get('/pre-profile', function(req,res){
+
+  res.render('pre-profile.html')
+
+})
+
 
 router.post('/api/create', function(req,res){
 
@@ -159,7 +165,7 @@ router.post('/api/create', function(req,res){
     name: req.body.name,
     imageUrl: req.body.imageUrl,
     //create a uniqur slug
-    slug : req.body.name.toLowerCase().replace(/[^\w ]+/g,'').replace(/ +/g,'-')
+    // slug : req.body.name.toLowerCase().replace(/[^\w ]+/g,'').replace(/ +/g,'-')
   }
 
 
@@ -189,7 +195,7 @@ router.post('/api/create', function(req,res){
     // res.json(data)
 
     // return res.json(jsonData);
-    return res.render('/directory')
+    //return res.render('/directory')
 
   })
 
@@ -240,8 +246,6 @@ router.post('/api/create/image', multipartMiddleware, function(req,res){
 
   var personObj = {
     name: req.body.name,
-    itpYear: req.body.itpYear,
-    interests: req.body.interests.split(','),
     link: req.body.link,
     slug : req.body.name.toLowerCase().replace(/[^\w ]+/g,'').replace(/ +/g,'-')
   }

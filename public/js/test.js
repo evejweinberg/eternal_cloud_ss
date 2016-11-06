@@ -175,7 +175,7 @@ scene.add(mesh2)
           var video_mat = new THREE.MeshPhongMaterial({
             color: 0xf3b7b7
 
-            map: people[i].imageURL
+            // map: people[i].imageURL
           })
       var video_mesh = new THREE.Mesh( video_geo, video_mat );
       video_mesh.position.x = i*boxSize+60
