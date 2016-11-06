@@ -165,10 +165,10 @@ var loader2 = new THREE.TextureLoader(loadingManager);
   		url : '/api/get',
   		dataType : 'json',
   		success : function(response) {
-  			console.log(response);
+  			// console.log(response);
   			var people = response.people;
   			for(var i=0;i<people.length;i++){
-          console.log(people[i])
+          // console.log(people[i])
   				// var htmlToAdd = '<div class="col-md-4">'+
           //
   				// 	'<h1>'+people[i].name+'</h1>'+
@@ -185,13 +185,12 @@ var loader2 = new THREE.TextureLoader(loadingManager);
             color: 0xf3b7b7
             // map: people[i].imageURL
           })
-          console.log('person Texture is '+ personTexture)
-          if (personTexture)
+          console.log(personTexture)
+          // if (personTexture)
           var video_mesh = new THREE.Mesh( video_geo, personTexture );
 
           video_mesh.position.x = -60 + ((i%3)*60)
           if (i%3 == 0){
-            console.log('move down')
             movePeopleDown -=60
             video_mesh.position.y = movePeopleDown
           } else {
@@ -199,7 +198,7 @@ var loader2 = new THREE.TextureLoader(loadingManager);
           }
           allMembers.push(video_mesh)
           allMembers[i].material.map = people[i].imageURL
-          console.log(allMembers[i].position.x, allMembers[i].position.y)
+          // console.log(allMembers[i].position.x, allMembers[i].position.y)
           scene.add(allMembers[i]);
   			}
 
