@@ -1,14 +1,15 @@
 var image_tex, video, buffer, pre_video_tex, video_tex, video_mat, video_mesh, video_geo, buffer_mat, buffer_geo, buffer_mesh;
-
 var ortho_width = 1920, ortho_height = 1080, ortho_near = -1, ortho_far = 1;
 var boxSize = 20;
 var allMembers = [];
-var loadingManager = new THREE.LoadingManager();
 var personTexture;
 var stats, scene, renderer, composer;
-var camera, cameraControls;
+var camera, cameraControls, material1;
 var movePeopleDown = 120;
 
+//////DONA LOADING VARIABLES ///////////
+
+var loadingManager = new THREE.LoadingManager();
 loadingManager.onProgress = function(item, loaded, total){
 
   //Loading precentage pattern
@@ -18,35 +19,42 @@ loadingManager.onProgress = function(item, loaded, total){
 
 //Signify loading done
 loadingManager.onLoad = function(){
+  console.log('all elements loaded')
+
   //Start the scene when the models are done loading
   init()
 
 }
 
-var loader2 = new THREE.TextureLoader(loadingManager);
-//callback function
-    loader2.load('../img/leo.jpg', onTextureLoaded2);
-
-    loader2.anisotropy = 4;
-    loader2.wrapS = loader2.wrapT = THREE.RepeatWrapping;
-    loader2.format = THREE.RGBFormat;
-    function onTextureLoaded2(texture) {
-
-      console.log(texture)
-
-        personTexture = new THREE.MeshPhongMaterial({
-            roughness: .64,
-            metalness: .81,
-            transparent: false,
-            opacity: 1,
-            color: pink,
-            map: texture,
-            side: THREE.DoubleSide
-        });
+//this works, so I know the image path is correct
+// var img = document.createElement('img');
+// img.src = '../img/leo.jpg';
+// document.getElementById('container').appendChild(img);
 
 
 
-    } //////////DONE LOADING IMAGE//////////
+
+
+
+
+    // function onTextureLoaded2(texture) {
+    //
+    //   // console.log(texture)
+    //
+    //     personTexture = new THREE.MeshPhongMaterial({
+    //         roughness: .64,
+    //         metalness: .81,
+    //         transparent: false,
+    //         opacity: 1,
+    //         color: 0xffffff,
+    //         map: texture,
+    //         // map: '..img/leo.jpg',
+    //         side: THREE.DoubleSide
+    //     });
+    //
+    //
+    //
+    // } //////////DONE LOADING IMAGE//////////
 
 
 
@@ -55,6 +63,16 @@ var loader2 = new THREE.TextureLoader(loadingManager);
 
 
   function init(){
+    var loader2 = new THREE.TextureLoader(loadingManager);
+
+    var texture1 = loader2.load( "../img/leo.jpg", function(){
+      //why is this texture 1 not coming through?
+      console.log(texture1)
+      material1 = new THREE.MeshPhongMaterial( { color: 0xffffff, map: texture1 } );
+
+    })
+
+
 
 
     if( Detector.webgl ){
@@ -97,8 +115,7 @@ var loader2 = new THREE.TextureLoader(loadingManager);
       // document.getElementById('inlineDoc').innerHTML	+= "- <i>f</i> for fullscreen";
     }
 
-    // here you add your objects
-    // - you will most likely replace this part by your own
+    // LOTS OF LIGHTS
     var light	= new THREE.AmbientLight( Math.random() * 0xffffff );
     scene.add( light );
     var light	= new THREE.DirectionalLight( Math.random() * 0xffffff );
@@ -132,7 +149,6 @@ var loader2 = new THREE.TextureLoader(loadingManager);
     // - see details at http://my.opera.com/emoller/blog/2011/12/20/requestanimationframe-for-smart-er-animating
     requestAnimationFrame( animate );
 
-    // do the render
     render();
 
     // update stats
@@ -141,7 +157,7 @@ var loader2 = new THREE.TextureLoader(loadingManager);
 
   // render the scene
   function render() {
-    // variable which is increase by Math.PI every seconds - usefull for animation
+    // increase by Math.PI every seconds - usefull for animation
     var PIseconds	= Date.now() * Math.PI;
 
     // update camera controls
@@ -159,7 +175,8 @@ var loader2 = new THREE.TextureLoader(loadingManager);
   }
 
 
-
+//get data from server and render cubes with people's images
+//for now lets just get one image mapped, to prove I cab do that.
   function renderPeeps(){
   	jQuery.ajax({
   		url : '/api/get',
@@ -168,15 +185,6 @@ var loader2 = new THREE.TextureLoader(loadingManager);
   			// console.log(response);
   			var people = response.people;
   			for(var i=0;i<people.length;i++){
-          // console.log(people[i])
-  				// var htmlToAdd = '<div class="col-md-4">'+
-          //
-  				// 	'<h1>'+people[i].name+'</h1>'+
-          //
-  				// 	'<a href="/edit/'+people[i]._id+'">Edit Person</a>'+
-  				// '</div>';
-          //
-  				// jQuery("#people-holder").append(htmlToAdd);
 
           var video_geo = new THREE.BoxGeometry( boxSize,boxSize,boxSize );
 
@@ -185,10 +193,14 @@ var loader2 = new THREE.TextureLoader(loadingManager);
             color: 0xf3b7b7
             // map: people[i].imageURL
           })
-          console.log(personTexture)
-          // if (personTexture)
-          var video_mesh = new THREE.Mesh( video_geo, personTexture );
 
+          //why is thr map: undefined on this material?
+          console.log(material1)
+
+          //make a cube for each person
+          var video_mesh = new THREE.Mesh( video_geo, material1 );
+
+          //place them in a grid
           video_mesh.position.x = -60 + ((i%3)*60)
           if (i%3 == 0){
             movePeopleDown -=60
@@ -198,7 +210,6 @@ var loader2 = new THREE.TextureLoader(loadingManager);
           }
           allMembers.push(video_mesh)
           allMembers[i].material.map = people[i].imageURL
-          // console.log(allMembers[i].position.x, allMembers[i].position.y)
           scene.add(allMembers[i]);
   			}
 
