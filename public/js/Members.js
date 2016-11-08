@@ -180,14 +180,20 @@ function textureLoaded(texture) {
 //get data from server and render cubes with people's images
 //for now lets just get one image mapped, to prove I cab do that.
   function renderPeeps(texture){
+    console.log(texture)
   	jQuery.ajax({
   		url : '/api/get',
   		dataType : 'json',
   		success : function(response) {
-  			// console.log(response);
+  			// console.log(response.people);
   			var people = response.people;
   			for(var i=0;i<people.length;i++){
+          // console.log(people[i].imageUrl)
 
+if (people[i].imageUrl.includes('eternaltest')){
+  console.log(people[i].imageUrl)
+  texture = people[i].imageUrl
+}
 
 
           var video_geo = new THREE.BoxGeometry( boxSize,boxSize,boxSize );
@@ -202,7 +208,7 @@ function textureLoaded(texture) {
           // console.log(material1)
 
           //make a cube for each person
-          var video_mesh = new THREE.Mesh( video_geo, material1 );
+          var video_mesh = new THREE.Mesh( video_geo, video_mat );
 
           //this did not work either
           // video_mesh.material.map = document.getElementById("yourCanvas");
