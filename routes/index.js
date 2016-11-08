@@ -8,19 +8,46 @@ var Course = require("../models/course.js");
 
 // S3 File dependencies
 var AWS = require('aws-sdk');
+
 var awsBucketName = process.env.AWS_BUCKET_NAME;
-var s3Path = process.env.AWS_S3_PATH; // TODO - we shouldn't hard code the path, but get a temp URL dynamically using aws-sdk's getObject
-AWS.config.update({
-  accessKeyId: process.env.AWS_ACCESS_KEY,
-  secretAccessKey: process.env.AWS_SECRET_KEY
-});
-var s3 = new AWS.S3();
+var s3Path = process.env.AWS_S3_PATH; //  - we shouldn't hard code the path, but get a temp URL dynamically using aws-sdk's getObject
+
 
 // file processing dependencies
 var fs = require('fs');
 var multipart = require('connect-multiparty');
 var multipartMiddleware = multipart();
 
+// require middleware to handle multipart form data
+var multer = require('multer');
+
+// create a new storage object using multer middleware to
+// receive the blob as a base64 incoded data object as part of a multipart
+// form that's sent from the client-side
+
+var storage = multer.diskStorage({
+    destination: function(req, file, cb) {
+        var newDestination = 'uploads/';
+        var stat = null;
+        try {
+            stat = fs.statSync(newDestination);
+        } catch (err) {
+            fs.mkdirSync(newDestination);
+        }
+        if (stat && !stat.isDirectory()) {
+            throw new Error('Directory cannot be created because an inode of a different type exists at "' + dest + '"');
+        }
+        cb(null, newDestination);
+
+    },
+    filename: function(req, file, cb) {
+        cb(null, file.originalname);
+    }
+});
+
+var upload = multer({
+  storage: storage
+});
 
 
 
@@ -52,29 +79,7 @@ router.get('/', function(req, res) {
 
 });
 
-router.get('/add-person', function(req,res){
 
-  res.render('add.html')
-
-})
-
-router.get('/login', function(req,res){
-
-  res.render('login.html')
-
-})
-
-router.get('/add-person-with-image', function(req,res){
-
-  res.render('add-with-image.html')
-
-})
-
-router.get('/directory', function(req,res){
-
-  res.render('directory.html')
-
-})
 
 
 router.get('/edit/:id', function(req,res){
@@ -104,52 +109,245 @@ router.get('/edit/:id', function(req,res){
 })
 
 
+router.post('/submitProfile', upload.single('file'), function(req,res){
+
+    console.log('attempting to submit a profile');
+    // console.log(req.body.name);
+    // console.log(req.body.data);
+
+    var buf = new Buffer(req.body.data, 'base64');
+
+    console.log(buf)
+
+    // reference to the Amazon S3 Bucket
+    // var s3bucket = new AWS.S3({params: {Bucket: 'eternalcloud' }});
+
+    // console.log(s3bucket)
+    // Set the bucket object properties
+    // Key == filename
+    // Body == contents of file
+    // ACL == Should it be public? Private?
+    // ContentType == MimeType of file ie. image/jpeg.
+
+    AWS.config.update({
+      accessKeyId:'AKIAI53KEB3NXQ6PZJCQ',
+      secretAccessKey:'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'
+    });
+    AWS.config.update({region: 'us-east-1'})
+
+    var s3 = new AWS.S3();
+
+    var tempName = req.body.name + '.jpg';
+
+    var params = {
+      Bucket: 'eternaltest',
+      Key: tempName,
+      ACL: 'public-read',
+      Body: buf
+    };
+
+
+    s3.upload(params, function(err,data){
+      if(err) console.log(err);
+      else console.log('success@');
+    });
+
+    res.json({msg: "success!"});
+
+    var publicUrl = 'https://s3.amazonaws.com/eternaltest/' + tempName;
+    console.log('public url: ' + publicUrl);
+    // Put the above Object in the Bucket
+    // s3bucket.putObject(params, function(err, data) {
+    //   if (err) {
+    //     console.log(err)
+    //     return;
+    //   } else {
+    //     console.log("Successfully uploaded data to s3 bucket");
+    //
+    //     }
+    //   })
+        // now that we have the image
+        // we can add the s3 url our person object from above
+        // personObj['imageUrl'] = s3Path + cleanedFileName;
+
+        // now, we can create our person instance
+        // var person = new Person(personObj);
+
+        // person.save(function(err,data){
+        //   if(err){
+        //     var error = {
+        //       status: "ERROR",
+        //       message: err
+        //     }
+        //     return res.json(err)
+        //   }
+        //
+        //   var jsonData = {
+        //     status: "OK",
+        //     person: data
+        //   }
+        //
+        //   return res.json(jsonData);
+        // })
+
+      // }
+
+    // }); // end of putObject function
+
+
+});
 
 
 
+/*
+
+router.post('/api/create/image', multipartMiddleware, function(req,res){
+
+  console.log('the incoming data >> ' + JSON.stringify(req.body));
+  console.log('the incoming image file >> ' + JSON.stringify(req.files.image));
+
+  var personObj = {
+    name: req.body.name,
+    imageUrl: req.body.imageUrl,
+    slug : req.body.name.toLowerCase().replace(/[^\w ]+/g,'').replace(/ +/g,'-')
+  }
+
+  if (req.body.hasGlasses == 'yes') personObj['hasGlasses'] = true;
+  else personObj['hasGlasses'] = false;
 
 
+  // NOW, we need to deal with the image
+  // the contents of the image will come in req.files (not req.body)
+  var filename = req.files.image.name; // actual filename of file
+  var path = req.files.image.path; // will be put into a temp directory
+  var mimeType = req.files.image.type; // image/jpeg or actual mime type
 
+  // create a cleaned file name to store in S3
+  // see cleanFileName function below
+  var cleanedFileName = cleanFileName(filename);
 
+  // We first need to open and read the uploaded image into a buffer
+  fs.readFile(path, function(err, file_buffer){
 
+    // reference to the Amazon S3 Bucket
+    var s3bucket = new AWS.S3({params: {Bucket: awsBucketName}});
 
+    // Set the bucket object properties
+    // Key == filename
+    // Body == contents of file
+    // ACL == Should it be public? Private?
+    // ContentType == MimeType of file ie. image/jpeg.
+    var params = {
+      Key: cleanedFileName,
+      Body: file_buffer,
+      ACL: 'public-read',
+      ContentType: mimeType
+    };
 
+    // Put the above Object in the Bucket
+    s3bucket.putObject(params, function(err, data) {
+      if (err) {
+        console.log(err)
+        return;
+      } else {
+        console.log("Successfully uploaded data to s3 bucket");
 
+        // now that we have the image
+        // we can add the s3 url our person object from above
+        personObj['imageUrl'] = s3Path + cleanedFileName;
 
-router.get('/edit/:id', function(req,res){
+        // now, we can create our person instance
+        var person = new Person(personObj);
 
-  //get the id
+        person.save(function(err,data){
+          if(err){
+            var error = {
+              status: "ERROR",
+              message: err
+            }
+            return res.json(err)
+          }
 
-  var requestedId = req.params.id;
+          var jsonData = {
+            status: "OK",
+            person: data
+          }
 
+          return res.json(jsonData);
+        })
 
-//ask database for information
-  Person.findById(requestedId,function(err,data){
-    if(err){
-      var error = {
-        status: "ERROR",
-        message: err
       }
-      return res.json(err)
-    }
 
-    var viewData = {
-      status: "OK",
-      person: data
-    }
-//views > edit.html
-    return res.render('edit.html',viewData);
-  })
+    }); // end of putObject function
 
+  });// end of read file
 })
 
-router.get('/pre-profile', function(req,res){
-
-  res.render('pre-profile.html')
-
-})
+*/
 
 
+
+
+
+function cleanFileName (filename) {
+
+    // cleans and generates new filename for example userID=abc123 and filename="My Pet Dog.jpg"
+    // will return "abc123_my_pet_dog.jpg"
+    var fileParts = filename.split(".");
+
+    //get the file extension
+    var fileExtension = fileParts[fileParts.length-1]; //get last part of file
+
+    //add time string to make filename a little more random
+    d = new Date();
+    timeStr = d.getTime();
+
+    //name without extension
+    newFileName = fileParts[0];
+
+    return newFilename = timeStr + "_" + fileParts[0].toLowerCase().replace(/[^\w ]+/g,'').replace(/ +/g,'_') + "." + fileExtension;
+
+}
+
+
+
+
+
+
+
+
+// router.get('/edit/:id', function(req,res){
+//
+//   //get the id
+//
+//   var requestedId = req.params.id;
+//
+//
+// //ask database for information
+//   Person.findById(requestedId,function(err,data){
+//     if(err){
+//       var error = {
+//         status: "ERROR",
+//         message: err
+//       }
+//       return res.json(err)
+//     }
+//
+//     var viewData = {
+//       status: "OK",
+//       person: data
+//     }
+// //views > edit.html
+//     return res.render('edit.html',viewData);
+//   })
+//
+// })
+
+
+
+
+
+//was hitting this route when the form was simply going to mongoose
 router.post('/api/create', function(req,res){
 
   // if (!req.body.name){
@@ -167,8 +365,6 @@ router.post('/api/create', function(req,res){
     //create a uniqur slug
     // slug : req.body.name.toLowerCase().replace(/[^\w ]+/g,'').replace(/ +/g,'-')
   }
-
-
 
   //save to the database, send through the attributes as a json.
   var person = new Person(personObj);
@@ -191,364 +387,167 @@ router.post('/api/create', function(req,res){
       person: data
     }
 
-    // console.log(data)
-    // res.json(data)
-
-    // return res.json(jsonData);
-    //return res.render('/directory')
 
   })
-
 })
 
-router.post('/api/edit/:id', function(req,res){
+// router.post('/api/edit/:id', function(req,res){
+//
+//   console.log(req.body);
+//   var requestedId = req.params.id;
+//
+//   var personObj = {
+//     name: req.body.name,
+//     // itpYear: req.body.itpYear,
+//     // interests: req.body.interests.split(','),
+//     // link: req.body.link,
+//     imageUrl: req.body.imageUrl,
+//     slug : req.body.name.toLowerCase().replace(/[^\w ]+/g,'').replace(/ +/g,'_')
+//   }
+//
+//   console.log(personObj);
+//
+//   Person.findByIdAndUpdate(requestedId,personObj,function(err,data){
+//     if(err){
+//       var error = {
+//         status: "ERROR",
+//         message: err
+//       }
+//       return res.json(error)
+//     }
+//
+//     var jsonData = {
+//       status: "OK",
+//       person: data
+//     }
+//
+//     //return res.json(jsonData);
+//
+//     return res.redirect('/directory');
+//
+//   })
+//
+// });
 
-  console.log(req.body);
-  var requestedId = req.params.id;
 
-  var personObj = {
-    name: req.body.name,
-    itpYear: req.body.itpYear,
-    interests: req.body.interests.split(','),
-    link: req.body.link,
-    imageUrl: req.body.imageUrl,
-    slug : req.body.name.toLowerCase().replace(/[^\w ]+/g,'').replace(/ +/g,'_')
-  }
 
-  console.log(personObj);
+// router.get('/api/get', function(req,res){
+// //find all items
+//   Person.find(function(err,data){
+//
+//       if(err){
+//         var error = {
+//           status: "ERROR",
+//           message: err
+//         }
+//         return res.json(err)
+//       }
+//
+//       var jsonData = {
+//         status: "OK",
+//         people: data
+//       }
+//
+//       return res.json(jsonData);
+//
+//   })
+//
+// })
 
-  Person.findByIdAndUpdate(requestedId,personObj,function(err,data){
-    if(err){
-      var error = {
-        status: "ERROR",
-        message: err
-      }
-      return res.json(error)
-    }
+// router.get('/api/get/year/:itpYear',function(req,res){
+//
+//   var requestedITPYear = req.params.itpYear;
+//
+//   console.log(requestedITPYear);
+//
+//   Person.find({itpYear:requestedITPYear},function(err,data){
+//       if(err){
+//         var error = {
+//           status: "ERROR",
+//           message: err
+//         }
+//         return res.json(err)
+//       }
+//
+//       var jsonData = {
+//         status: "OK",
+//         people: data
+//       }
+//
+//       return res.json(jsonData);
+//   })
+//
+// })
 
-    var jsonData = {
-      status: "OK",
-      person: data
-    }
+// router.get('/api/person/:slug'), function(req,res){
+//   var reqestedSlug = req.params.slug;
+//   console.log(reqestedSlug)
+//   Person.findOne({slug:reqestedSlug}, function(err,data){
+//     if (err){
+//       return res.json({status: error})
+//     }
+//
+//     if (!data || data ==null || data==''){
+//
+//     }
+//
+//     console.log('found that person')
+//     console.log(data)
+//     res.json(data)
+//
+//   })
+// }
 
-    //return res.json(jsonData);
 
-    return res.redirect('/directory');
+// router.get('/api/get/query',function(req,res){
+//
+//   console.log(req.query);
+//
+//   var searchQuery = {};
+//
+//   if(req.query.itpYear){
+//     searchQuery['itpYear'] =  req.query.itpYear
+//   }
+//
+//   if(req.query.name){
+//     searchQuery['name'] =  req.query.name
+//   }
+//
+//   if(req.query.hasGlasses){
+//     searchQuery['hasGlasses'] =  req.query.hasGlasses
+//   }
+//
+//   Person.find(searchQuery,function(err,data){
+//     res.json(data);
+//   })
+//
+//   // Person.find(searchQuery).sort('-name').exec(function(err,data){
+//   //   res.json(data);
+//   // })
+//
+//
+// })
 
-  })
 
+
+
+//staging front end website
+router.get('/pre-profile', function(req,res){
+  res.render('pre-profile.html')
 })
 
-router.post('/api/create/image', multipartMiddleware, function(req,res){
-
-  console.log('the incoming data >> ' + JSON.stringify(req.body));
-  console.log('the incoming image file >> ' + JSON.stringify(req.files.image));
-
-  var personObj = {
-    name: req.body.name,
-    link: req.body.link,
-    slug : req.body.name.toLowerCase().replace(/[^\w ]+/g,'').replace(/ +/g,'-')
-  }
-
-  if (req.body.hasGlasses == 'yes') personObj['hasGlasses'] = true;
-  else personObj['hasGlasses'] = false;
-
-
-  // NOW, we need to deal with the image
-  // the contents of the image will come in req.files (not req.body)
-  var filename = req.files.image.name; // actual filename of file
-  var path = req.files.image.path; // will be put into a temp directory
-  var mimeType = req.files.image.type; // image/jpeg or actual mime type
-
-  // create a cleaned file name to store in S3
-  // see cleanFileName function below
-  var cleanedFileName = cleanFileName(filename);
-
-  // We first need to open and read the uploaded image into a buffer
-  fs.readFile(path, function(err, file_buffer){
-
-    // reference to the Amazon S3 Bucket
-    var s3bucket = new AWS.S3({params: {Bucket: awsBucketName}});
-
-    // Set the bucket object properties
-    // Key == filename
-    // Body == contents of file
-    // ACL == Should it be public? Private?
-    // ContentType == MimeType of file ie. image/jpeg.
-    var params = {
-      Key: cleanedFileName,
-      Body: file_buffer,
-      ACL: 'public-read',
-      ContentType: mimeType
-    };
-
-    // Put the above Object in the Bucket
-    s3bucket.putObject(params, function(err, data) {
-      if (err) {
-        console.log(err)
-        return;
-      } else {
-        console.log("Successfully uploaded data to s3 bucket");
-
-        // now that we have the image
-        // we can add the s3 url our person object from above
-        personObj['imageUrl'] = s3Path + cleanedFileName;
-
-        // now, we can create our person instance
-        var person = new Person(personObj);
-
-        person.save(function(err,data){
-          if(err){
-            var error = {
-              status: "ERROR",
-              message: err
-            }
-            return res.json(err)
-          }
-
-          var jsonData = {
-            status: "OK",
-            person: data
-          }
-
-          return res.json(jsonData);
-        })
-
-      }
-
-    }); // end of putObject function
-
-  });// end of read file
-
+router.get('/add-person', function(req,res){
+  res.render('add.html')
 })
 
-function cleanFileName (filename) {
-
-    // cleans and generates new filename for example userID=abc123 and filename="My Pet Dog.jpg"
-    // will return "abc123_my_pet_dog.jpg"
-    var fileParts = filename.split(".");
-
-    //get the file extension
-    var fileExtension = fileParts[fileParts.length-1]; //get last part of file
-
-    //add time string to make filename a little more random
-    d = new Date();
-    timeStr = d.getTime();
-
-    //name without extension
-    newFileName = fileParts[0];
-
-    return newFilename = timeStr + "_" + fileParts[0].toLowerCase().replace(/[^\w ]+/g,'').replace(/ +/g,'_') + "." + fileExtension;
-
-}
-
-router.get('/api/get', function(req,res){
-//find all items
-  Person.find(function(err,data){
-
-      if(err){
-        var error = {
-          status: "ERROR",
-          message: err
-        }
-        return res.json(err)
-      }
-
-      var jsonData = {
-        status: "OK",
-        people: data
-      }
-
-      return res.json(jsonData);
-
-  })
-
-})
-
-router.get('/api/get/year/:itpYear',function(req,res){
-
-  var requestedITPYear = req.params.itpYear;
-
-  console.log(requestedITPYear);
-
-  Person.find({itpYear:requestedITPYear},function(err,data){
-      if(err){
-        var error = {
-          status: "ERROR",
-          message: err
-        }
-        return res.json(err)
-      }
-
-      var jsonData = {
-        status: "OK",
-        people: data
-      }
-
-      return res.json(jsonData);
-  })
-
-})
-
-router.get('/api/person/:slug'), function(req,res){
-  var reqestedSlug = req.params.slug;
-  console.log(reqestedSlug)
-  Person.findOne({slug:reqestedSlug}, function(err,data){
-    if (err){
-      return res.json({status: error})
-    }
-
-    if (!data || data ==null || data==''){
-
-    }
-
-    console.log('found that person')
-    console.log(data)
-    res.json(data)
-
-  })
-}
-
-// year, name
-// /api/get/query?year=2016&name=Sam&hasGlasses=true
-
-router.get('/api/get/query',function(req,res){
-
-  console.log(req.query);
-
-  var searchQuery = {};
-
-  if(req.query.itpYear){
-    searchQuery['itpYear'] =  req.query.itpYear
-  }
-
-  if(req.query.name){
-    searchQuery['name'] =  req.query.name
-  }
-
-  if(req.query.hasGlasses){
-    searchQuery['hasGlasses'] =  req.query.hasGlasses
-  }
-
-  Person.find(searchQuery,function(err,data){
-    res.json(data);
-  })
-
-  // Person.find(searchQuery).sort('-name').exec(function(err,data){
-  //   res.json(data);
-  // })
-
-
+router.get('/login', function(req,res){
+  res.render('login.html')
 })
 
 
-
-
-router.post('/api/create/image', multipartMiddleware, function(req,res){
-
-  console.log('the incoming data >> ' + JSON.stringify(req.body));
-  console.log('the incoming image file >> ' + JSON.stringify(req.files.image));
-
-  var personObj = {
-    name: req.body.name,
-    itpYear: req.body.itpYear,
-    interests: req.body.interests.split(','),
-    link: req.body.link,
-    slug : req.body.name.toLowerCase().replace(/[^\w ]+/g,'').replace(/ +/g,'-')
-  }
-
-  if (req.body.hasGlasses == 'yes') personObj['hasGlasses'] = true;
-  else personObj['hasGlasses'] = false;
-
-
-  // NOW, we need to deal with the image
-  // the contents of the image will come in req.files (not req.body)
-  var filename = req.files.image.name; // actual filename of file
-  var path = req.files.image.path; // will be put into a temp directory
-  var mimeType = req.files.image.type; // image/jpeg or actual mime type
-
-  // create a cleaned file name to store in S3
-  // see cleanFileName function below
-  var cleanedFileName = cleanFileName(filename);
-
-  // We first need to open and read the uploaded image into a buffer
-  fs.readFile(path, function(err, file_buffer){
-
-    // reference to the Amazon S3 Bucket
-    var s3bucket = new AWS.S3({params: {Bucket: awsBucketName}});
-
-    // Set the bucket object properties
-    // Key == filename
-    // Body == contents of file
-    // ACL == Should it be public? Private?
-    // ContentType == MimeType of file ie. image/jpeg.
-    var params = {
-      Key: cleanedFileName,
-      Body: file_buffer,
-      ACL: 'public-read',
-      ContentType: mimeType
-    };
-
-    // Put the above Object in the Bucket
-    s3bucket.putObject(params, function(err, data) {
-      if (err) {
-        console.log(err)
-        return;
-      } else {
-        console.log("Successfully uploaded data to s3 bucket");
-
-        // now that we have the image
-        // we can add the s3 url our person object from above
-        personObj['imageUrl'] = s3Path + cleanedFileName;
-
-        // now, we can create our person instance
-        var person = new Person(personObj);
-
-        person.save(function(err,data){
-          if(err){
-            var error = {
-              status: "ERROR",
-              message: err
-            }
-            return res.json(err)
-          }
-
-          var jsonData = {
-            status: "OK",
-            person: data
-          }
-
-          return res.json(jsonData);
-        })
-
-      }
-
-    }); // end of putObject function
-
-  });// end of read file
+router.get('/directory', function(req,res){
+  res.render('directory.html')
 })
-
-function cleanFileName (filename) {
-
-    // cleans and generates new filename for example userID=abc123 and filename="My Pet Dog.jpg"
-    // will return "abc123_my_pet_dog.jpg"
-    var fileParts = filename.split(".");
-
-    //get the file extension
-    var fileExtension = fileParts[fileParts.length-1]; //get last part of file
-
-    //add time string to make filename a little more random
-    d = new Date();
-    timeStr = d.getTime();
-
-    //name without extension
-    newFileName = fileParts[0];
-
-    return newFilename = timeStr + "_" + fileParts[0].toLowerCase().replace(/[^\w ]+/g,'').replace(/ +/g,'_') + "." + fileExtension;
-
-}
-
-
 
 
 
