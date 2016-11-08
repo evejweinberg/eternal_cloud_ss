@@ -72,7 +72,7 @@ router.get('/', function(req, res) {
   // res.json(jsonData)
 
   // respond by redirecting
-  res.redirect('/directory')
+  res.redirect('/pre-profile')
 
   // respond with html
   // res.render('directory.html')
@@ -171,7 +171,6 @@ router.post('/submitProfile', upload.single('file'), function(req,res){
           message: err
         }
         return res.json(err)
-        // res.redirect('/directory')
       }
 
       console.log('succesfully pushed', data)
@@ -183,7 +182,6 @@ router.post('/submitProfile', upload.single('file'), function(req,res){
       //respond back to the frint end. Here's the data
       return res.json(jsonData)
 
-      // return res.redirect('/directory')
 
 
     })
@@ -373,7 +371,7 @@ router.post('/api/create', function(req,res){
         message: err
       }
       // return res.json(err)
-      res.redirect('/directory')
+      res.redirect('/candidate')
     }
 
     var jsonData = {
@@ -385,43 +383,7 @@ router.post('/api/create', function(req,res){
   })
 })
 
-// router.post('/api/edit/:id', function(req,res){
-//
-//   console.log(req.body);
-//   var requestedId = req.params.id;
-//
-//   var personObj = {
-//     name: req.body.name,
-//     // itpYear: req.body.itpYear,
-//     // interests: req.body.interests.split(','),
-//     // link: req.body.link,
-//     imageUrl: req.body.imageUrl,
-//     slug : req.body.name.toLowerCase().replace(/[^\w ]+/g,'').replace(/ +/g,'_')
-//   }
-//
-//   console.log(personObj);
-//
-//   Person.findByIdAndUpdate(requestedId,personObj,function(err,data){
-//     if(err){
-//       var error = {
-//         status: "ERROR",
-//         message: err
-//       }
-//       return res.json(error)
-//     }
-//
-//     var jsonData = {
-//       status: "OK",
-//       person: data
-//     }
-//
-//     //return res.json(jsonData);
-//
-//     return res.redirect('/directory');
-//
-//   })
-//
-// });
+
 
 
 
@@ -537,6 +499,11 @@ router.get('/add-person', function(req,res){
 router.get('/login', function(req,res){
   res.render('login.html')
 })
+
+router.get('/candidate', function(req,res){
+  res.render('candidate.html')
+})
+
 
 
 router.get('/directory', function(req,res){

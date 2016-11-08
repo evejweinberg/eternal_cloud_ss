@@ -196,9 +196,9 @@
 			// take snapshot and get image data
 			Webcam.snap( function(data_uri) {
 
-				console.log('setting the global blob');
+				// console.log('setting the global blob');
 				globalBlob = data_uri;
-				console.log ('data uri: ' + data_uri);
+				// console.log ('data uri: ' + data_uri);
 				newImage = data_uri;
 				var newImageB = new Image()
 				newImageB.src = data_uri;
@@ -252,7 +252,7 @@
 						//if the status from the backend is 'OK' then do this
 						//change it on both sides if you change the string
 		         if (data.status == 'OK') {
-							  window.location = '/directory';
+							  window.location = '/candidate';
 						 } else {
 							 console.log('what else')
 						 }

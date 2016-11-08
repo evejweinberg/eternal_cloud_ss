@@ -35,10 +35,7 @@ loadingManager.onLoad = function(){
 //call init right away
 init()
 
-//this works, so I know the image path is correct
-// var img = document.createElement('img');
-// img.src = '../img/leo.jpg';
-// document.getElementById('container').appendChild(img);
+
 
 
 
@@ -63,10 +60,10 @@ function textureLoaded(texture) {
 
   function init(){
 
-    //create a loader
-    loader2 = new THREE.TextureLoader(loadingManager);
-    //load the texture, and whwen it's done, push it into a Phong material
-    loader2.load("../img/leo.jpg", textureLoaded);
+    // //create a loader
+    // loader2 = new THREE.TextureLoader(loadingManager);
+    // //load the texture, and whwen it's done, push it into a Phong material
+    // loader2.load("../img/leo.jpg", textureLoaded);
 
 
 
@@ -190,73 +187,37 @@ function textureLoaded(texture) {
   		dataType : 'json',
   		success : function(response) {
   			// console.log(response.people);
-  			var people = response.people;
+  			var person = response.people[people.length];
         var loader = new THREE.TextureLoader();
-
-
-  			for(var i=0;i<people.length;i++){
-          // console.log(people[i].imageUrl)
 
           var video_geo = new THREE.BoxGeometry( boxSize,boxSize,boxSize );
 
 
-          if (people[i].imageUrl.includes('eternaltest')){
+          if (person.imageUrl.includes('eternaltest')){
 
-
+            //create a loader
+            var loader2 = new THREE.TextureLoader();
             //load the texture, and whwen it's done, push it into a Phong material
-            loader.load(people[i].imageUrl, function(){
-              console.log(people[i].imageUrl)
-              texture = people[i].imageUrl
-              var video_mat = new THREE.MeshPhongMaterial({
-                color: 0xffffff,
-                map: texture
-              })
-              var video_mesh = new THREE.Mesh( video_geo, video_mat );
+            loader2.load(person.imageUrl, textureLoaded);
+          }
 
+        function   textureLoaded(texture){
+          var video_mat = new THREE.MeshPhongMaterial({
+            color: 0xffffff,
+            map: texture
+          })
+          var video_mesh = new THREE.Mesh( video_geo, video_mat );
+              scene.add(video_mesh);
 
+                }
+
+          }
             });
 
-
-
-
-          } else{
-
-            var video_mat = new THREE.MeshPhongMaterial({
-              color: 0xffffff,
-              map: texture
-            })
-            var video_mesh = new THREE.Mesh( video_geo, video_mat );
-
-
-
           }
 
 
 
-          //this did not work either
-          // video_mesh.material.map = document.getElementById("yourCanvas");
-
-
-          //place them in a grid
-          video_mesh.position.x = -60 + ((i%3)*60)
-          if (i%3 == 0){
-            movePeopleDown -=60
-            video_mesh.position.y = movePeopleDown
-            loadfont(people[i].name, 5, -60 + ((i%3)*60),movePeopleDown+boxSize,0)
-          } else {
-            video_mesh.position.y = movePeopleDown
-              loadfont(people[i].name, 5, -60 + ((i%3)*60),movePeopleDown+boxSize,0)
-          }
-          allMembers.push(video_mesh)
-          // allMembers[i].material.map = people[i].imageURL
-          scene.add(allMembers[i]);
-  			}
-
-
-
-  		}
-  	})
-  }
 
 
 
@@ -284,10 +245,7 @@ function textureLoaded(texture) {
     var textMaterial = new THREE.MeshPhongMaterial({
       color: pink,
       shininess: 0.0,
-      // wireframe: true
-      // roughness: 0.5,
-      // emissive: 0x000000,
-      // emissiveIntensity:.1
+
 
     });
 
@@ -300,8 +258,8 @@ function textureLoaded(texture) {
     scene.add(type);
 
 
-  });
-}
+  }); //font over
+}//font loader funcyion over
 
 
 window.addEventListener('resize', onResize, true);
