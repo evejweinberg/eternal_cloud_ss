@@ -124,7 +124,7 @@ router.post('/submitProfile', upload.single('file'), function(req,res){
     });
     AWS.config.update({region: 'us-east-1'})
 
-    var s3 = new AWS.S3({params: {Bucket: eternaltest, ACL: 'public-read'}});
+    var s3 = new AWS.S3({params: {Bucket: awsBucketName, ACL: 'public-read'}});
 
     // var s3 = new AWS.S3({params: {Bucket: awsBucketName}});
 
