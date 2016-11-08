@@ -249,7 +249,14 @@
 		         contentType: false
 		     }).done(function(data) {
 		        //  console.log(data);
-		         if (data.status == 'success') window.location.href = '/directory';
+						//if the status from the backend is 'OK' then do this
+						//change it on both sides if you change the string
+		         if (data.status == 'OK') {
+							  window.location = '/directory';
+						 } else {
+							 console.log('what else')
+						 }
+
 
 		     });
 

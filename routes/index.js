@@ -112,32 +112,23 @@ router.get('/edit/:id', function(req,res){
 router.post('/submitProfile', upload.single('file'), function(req,res){
 
     console.log('attempting to submit a profile');
-    // console.log(req.body.name);
-    // console.log(req.body.data);
 
     var buf = new Buffer(req.body.data, 'base64');
 
-    console.log(buf)
 
-    // reference to the Amazon S3 Bucket
-    // var s3bucket = new AWS.S3({params: {Bucket: 'eternalcloud' }});
-
-    // console.log(s3bucket)
-    // Set the bucket object properties
-    // Key == filename
-    // Body == contents of file
-    // ACL == Should it be public? Private?
-    // ContentType == MimeType of file ie. image/jpeg.
 
     AWS.config.update({
-      accessKeyId:'AKIAI53KEB3NXQ6PZJCQ',
-      secretAccessKey:'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'
+
+      accessKeyId:process.env.AWS_ACCESS_KEY,
+      secretAccessKey:process.env.AWS_SECRET_KEY
     });
     AWS.config.update({region: 'us-east-1'})
 
     var s3 = new AWS.S3();
 
-    var tempName = req.body.name + '.jpg';
+    //take out special charachters first, look at what Sam did with slug
+    var tempName = req.body.name.toLowerCase().replace(/[^\w ]+/g,'').replace(/ +/g,'-') + '.jpg';
+
 
     var params = {
       Bucket: 'eternaltest',
@@ -152,47 +143,50 @@ router.post('/submitProfile', upload.single('file'), function(req,res){
       else console.log('success@');
     });
 
-    res.json({msg: "success!"});
+    // res.json({msg: "success!"});
 
     var publicUrl = 'https://s3.amazonaws.com/eternaltest/' + tempName;
     console.log('public url: ' + publicUrl);
-    // Put the above Object in the Bucket
-    // s3bucket.putObject(params, function(err, data) {
-    //   if (err) {
-    //     console.log(err)
-    //     return;
-    //   } else {
-    //     console.log("Successfully uploaded data to s3 bucket");
-    //
-    //     }
-    //   })
-        // now that we have the image
-        // we can add the s3 url our person object from above
-        // personObj['imageUrl'] = s3Path + cleanedFileName;
 
-        // now, we can create our person instance
-        // var person = new Person(personObj);
+    var personObj = {
+      //grab your mongood schema and double it here
+      name: req.body.name,
+      imageUrl: publicUrl,
+      //create a uniqur slug
+      slug : req.body.name.toLowerCase().replace(/[^\w ]+/g,'').replace(/ +/g,'-')
+    }
 
-        // person.save(function(err,data){
-        //   if(err){
-        //     var error = {
-        //       status: "ERROR",
-        //       message: err
-        //     }
-        //     return res.json(err)
-        //   }
-        //
-        //   var jsonData = {
-        //     status: "OK",
-        //     person: data
-        //   }
-        //
-        //   return res.json(jsonData);
-        // })
+    //save to the database, send through the attributes as a json.
+    var person = new Person(personObj);
+    //mongood database operation, save to database, and have database hit this callback
+    person.save(function(err,data){
+      if(err){
 
-      // }
+        console.log('error')
+        //this shows up to client side app
+        //so we could redirect them
+        // res.redirect('add/person')
+        var error = {
+          status: "ERROR",
+          message: err
+        }
+        return res.json(err)
+        // res.redirect('/directory')
+      }
 
-    // }); // end of putObject function
+      console.log('succesfully pushed', data)
+
+      var jsonData = {
+        status: "OK",
+        person: data
+      }
+      //respond back to the frint end. Here's the data
+      return res.json(jsonData)
+
+      // return res.redirect('/directory')
+
+
+    })
 
 
 });
@@ -431,28 +425,28 @@ router.post('/api/create', function(req,res){
 
 
 
-// router.get('/api/get', function(req,res){
-// //find all items
-//   Person.find(function(err,data){
-//
-//       if(err){
-//         var error = {
-//           status: "ERROR",
-//           message: err
-//         }
-//         return res.json(err)
-//       }
-//
-//       var jsonData = {
-//         status: "OK",
-//         people: data
-//       }
-//
-//       return res.json(jsonData);
-//
-//   })
-//
-// })
+router.get('/api/get', function(req,res){
+//find all items
+  Person.find(function(err,data){
+
+      if(err){
+        var error = {
+          status: "ERROR",
+          message: err
+        }
+        return res.json(err)
+      }
+
+      var jsonData = {
+        status: "OK",
+        people: data
+      }
+
+      return res.json(jsonData);
+
+  })
+
+})
 
 // router.get('/api/get/year/:itpYear',function(req,res){
 //
