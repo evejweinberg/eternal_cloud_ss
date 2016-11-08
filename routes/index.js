@@ -124,7 +124,7 @@ router.post('/submitProfile', upload.single('file'), function(req,res){
     });
     AWS.config.update({region: 'us-east-1'})
 
-    var s3 = new AWS.S3();
+    var s3 = new AWS.S3({params: {Bucket: awsBucketName, ACL: 'public-read'}});
 
     //take out special charachters first, look at what Sam did with slug
     var tempName = req.body.name.toLowerCase().replace(/[^\w ]+/g,'').replace(/ +/g,'-') + '.jpg';
