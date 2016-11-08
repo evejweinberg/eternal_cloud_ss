@@ -1,6 +1,6 @@
 var image_tex, video, buffer, pre_video_tex, video_tex, video_mat, video_mesh, video_geo, buffer_mat, buffer_geo, buffer_mesh;
 var ortho_width = 1920, ortho_height = 1080, ortho_near = -1, ortho_far = 1;
-var boxSize = 20;
+var boxSize = 50;
 var allMembers = [];
 var personTexture;
 var stats, scene, renderer, composer;
@@ -14,6 +14,7 @@ var teal =  0x009fc6;
 var pinkDrk = 0xf68f83;
 var mint = 0xa8e1d1;
 var purple = 0xb9a0b1;
+var glitchPass, composer;
 
 //////DONA LOADING VARIABLES ///////////
 
@@ -29,7 +30,7 @@ loadingManager.onProgress = function(item, loaded, total){
 loadingManager.onLoad = function(){
 
   //Start the animation when the models are done loading
-      animate();
+
 }
 
 //call init right away
@@ -39,57 +40,25 @@ init()
 
 
 
+
 var person, personFull;
-
-function textureLoaded(texture) {
-    material1 = new THREE.MeshStandardMaterial( { color: 0xffffff, map: texture, side: THREE.DoubleSide } );
-    person = new THREE.BoxGeometry(40,40,40)
-    personFull = new THREE.Mesh(person, material1)
-    console.log(personFull.material)
-    // scene.add(personFull)
-
-    renderPeeps(texture);
-
-
-}
-
-
-
+var group = new THREE.Group();
 
 
 
   function init(){
 
-    // //create a loader
-    // loader2 = new THREE.TextureLoader(loadingManager);
-    // //load the texture, and whwen it's done, push it into a Phong material
-    // loader2.load("../img/leo.jpg", textureLoaded);
 
-
-
-
-
-
-
-    //dont worry about not having WebGL
-    // if( Detector.webgl ){
       renderer = new THREE.WebGLRenderer({
         alpha: true,
         antialias		: true	// to get smoother output
         // preserveDrawingBuffer	: true	// to allow screenshot
       });
       renderer.setClearColor( 0xbbbbbb,0 );
-    // }else{
-    //   Detector.addGetWebGLMessage();
-    //   return true;
-    // }
-    renderer.setSize( window.innerWidth, window.innerHeight );
-    document.body.appendChild(renderer.domElement);
 
-    stats = new Stats();
-    stats.domElement.style.position	= 'absolute';
-    stats.domElement.style.bottom	= '0px';
-    document.body.appendChild( stats.domElement );
+      renderer.setSize( window.innerWidth, window.innerHeight );
+      document.body.appendChild(renderer.domElement);
+
 
     // create a scene
     scene = new THREE.Scene();
@@ -105,36 +74,46 @@ function textureLoaded(texture) {
 
 
     // LOTS OF LIGHTS
-    var light	= new THREE.AmbientLight( 0xffffff );
+    var light	= new THREE.AmbientLight( pink );
     scene.add( light );
-    var light	= new THREE.DirectionalLight( Math.random() * 0xffffff );
-    light.position.set( Math.random(), Math.random(), Math.random() ).normalize();
-    scene.add( light );
-    var light	= new THREE.DirectionalLight( Math.random() * 0xffffff );
+    var light	= new THREE.DirectionalLight( pink );
     light.position.set( Math.random(), Math.random(), Math.random() ).normalize();
     // scene.add( light );
-    var light	= new THREE.DirectionalLight( Math.random() * 0xffffff );
+    var light	= new THREE.DirectionalLight( mint );
     light.position.set( Math.random(), Math.random(), Math.random() ).normalize();
     // scene.add( light );
-    var light	= new THREE.PointLight( Math.random() * 0xffffff );
+    var light	= new THREE.DirectionalLight( pink );
+    light.position.set( Math.random(), Math.random(), Math.random() ).normalize();
+    // scene.add( light );
+    var light	= new THREE.PointLight(purple );
     light.position.set( Math.random()-0.5, Math.random()-0.5, Math.random()-0.5 )
           .normalize().multiplyScalar(1.2);
-    // scene.add( light );
-    var light	= new THREE.PointLight( Math.random() * 0xffffff );
+    scene.add( light );
+    var light	= new THREE.PointLight( mint );
     light.position.set( Math.random()-0.5, Math.random()-0.5, Math.random()-0.5 )
           .normalize().multiplyScalar(1.2);
     // scene.add( light );
 
 
     //does one cube load? YES!
-    // var geo = new THREE.BoxGeometry(30,30,30)
+    // var geo = new THREE.BoxGeometry(130,30,30)
     // var mat = new THREE.MeshBasicMaterial({color: 0xb2b7b7})
     // mesh = new THREE.Mesh(geo, material1)
     // scene.add(mesh)
     // mesh.position.z = -80
 
+    composer = new THREE.EffectComposer( renderer );
+    composer.addPass( new THREE.RenderPass( scene, camera ) );
 
-  // renderPeeps();
+    glitchPass = new THREE.GlitchPass();
+    glitchPass.renderToScreen = true;
+    composer.addPass( glitchPass );
+
+
+
+  renderCandidate();
+  animate();
+
 
   }
 
@@ -148,7 +127,7 @@ function textureLoaded(texture) {
     render();
 
     // update stats
-    stats.update();
+    // stats.update();
   }
 
   // render the scene
@@ -170,30 +149,32 @@ function textureLoaded(texture) {
     })
 
     // actually render the scene
-    renderer.render( scene, camera );
+    // renderer.render( scene, camera );
+    composer.render();
   }
 
 
 //get data from server and render cubes with people's images
 //for now lets just get one image mapped, to prove I cab do that.
-  function renderPeeps(texture){
+  function renderCandidate(texture){
 
 
 
+//get thr person from the database
 
-    console.log(texture)
   	jQuery.ajax({
   		url : '/api/get',
   		dataType : 'json',
   		success : function(response) {
-  			// console.log(response.people);
-  			var person = response.people[people.length];
+  			// console.log(response.people[response.people.length-1].imageUrl);
+  			var person = response.people[response.people.length-1];
         var loader = new THREE.TextureLoader();
-
+        // console.log(person)
           var video_geo = new THREE.BoxGeometry( boxSize,boxSize,boxSize );
 
 
           if (person.imageUrl.includes('eternaltest')){
+            console.log('valid image')
 
             //create a loader
             var loader2 = new THREE.TextureLoader();
@@ -201,20 +182,27 @@ function textureLoaded(texture) {
             loader2.load(person.imageUrl, textureLoaded);
           }
 
-        function   textureLoaded(texture){
-          var video_mat = new THREE.MeshPhongMaterial({
-            color: 0xffffff,
-            map: texture
-          })
-          var video_mesh = new THREE.Mesh( video_geo, video_mat );
-              scene.add(video_mesh);
+        function  textureLoaded(texture){
+              console.log(texture)
+            var video_mat = new THREE.MeshPhongMaterial({
+                color: 0xb7b7b7,
+                map: texture
+                  })
+            var video_mesh = new THREE.Mesh( video_geo, video_mat );
+            group.add(video_mesh)
+            loadfont(person.name, 11, 0,boxSize,0)
+            // console.log(loadfont(person.name, 11, 0,boxSize*1.3,0))
+            scene.add(group);
+            group.position.y = 30;
 
-                }
 
-          }
-            });
+          }//texture loader
 
-          }
+
+          }//success function
+        });//ajax request over
+
+    }//render candidate over
 
 
 
@@ -231,7 +219,7 @@ function textureLoaded(texture) {
 
       font: font,
       size: textSize,
-      height: 1,
+      height: 2,
       curveSegments: 12,
       bevelThickness: 0,
       bevelSize: 0,
@@ -244,7 +232,10 @@ function textureLoaded(texture) {
     var centerOffsetY = -.5 * ( textGeo.boundingBox.max.y - textGeo.boundingBox.min.y );
     var textMaterial = new THREE.MeshPhongMaterial({
       color: pink,
-      shininess: 0.0,
+      shininess: 30,
+      emissive: 0x000000,
+      reflectivity: .2
+      // specular: purple
 
 
     });
@@ -255,7 +246,10 @@ function textureLoaded(texture) {
     type.position.z = zpos
     type.geometry.translate(centerOffset, centerOffsetY, 0 );
 
-    scene.add(type);
+    group.add(type)
+
+    // console.log(type)
+    // return type;
 
 
   }); //font over
@@ -269,4 +263,5 @@ function onResize(e) {
       camera.updateProjectionMatrix();
       // renderer.setSize( window.innerWidth, window.innerHeight*ThreeSceneHghtRation );
         renderer.setSize( window.innerWidth, window.innerHeight);
+        	composer.setSize( window.innerWidth, window.innerHeight );
 }

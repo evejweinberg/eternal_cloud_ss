@@ -5,8 +5,20 @@ body {
 
 	color		: #222;
 	background-image: url('../img/bg.gif');
-	font-family	: arial;
+	font-family	: "Rubik";
 	font-size	: 100%;
+}
+
+#candidate-gif{
+	width: 220px;
+	margin: auto;
+	position: absolute;
+	left: 34%;
+	top: 53%;
+}
+
+.centered-type{
+	text-align: center;
 }
 
 #my_camera{
