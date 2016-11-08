@@ -109,6 +109,8 @@ router.get('/edit/:id', function(req,res){
 })
 
 
+
+
 router.post('/submitProfile', upload.single('file'), function(req,res){
 
     console.log('attempting to submit a profile');
@@ -344,9 +346,7 @@ function cleanFileName (filename) {
 //was hitting this route when the form was simply going to mongoose
 router.post('/api/create', function(req,res){
 
-  // if (!req.body.name){
-  //   //return an error
-  // }
+
   console.log('in api/create, and we got data');
   console.log(req.body);
 
@@ -357,7 +357,7 @@ router.post('/api/create', function(req,res){
     name: req.body.name,
     imageUrl: req.body.imageUrl,
     //create a uniqur slug
-    // slug : req.body.name.toLowerCase().replace(/[^\w ]+/g,'').replace(/ +/g,'-')
+    slug : req.body.name.toLowerCase().replace(/[^\w ]+/g,'').replace(/ +/g,'-')
   }
 
   //save to the database, send through the attributes as a json.
@@ -374,6 +374,7 @@ router.post('/api/create', function(req,res){
       }
       // return res.json(err)
       res.redirect('/candidate')
+      //redirect /third to /candidate
     }
 
     var jsonData = {
@@ -510,6 +511,11 @@ router.get('/candidate', function(req,res){
 
 router.get('/directory', function(req,res){
   res.render('directory.html')
+})
+
+
+router.post('/third', function(req,res){
+  res.render('blank.html')
 })
 
 

@@ -20,8 +20,9 @@ body {
 	width: 220px;
 	margin: auto;
 	position: absolute;
-	left: 34%;
+	left: 50%;
 	top: 53%;
+	transform: translateX(-50%);
 }
 
 .centered-type{
@@ -58,4 +59,11 @@ body {
 #container{
 	z-index: -20;
 	position: absolute;
+}
+
+
+#candidate-container{
+	float: left;
+	width: 200px;
+
 }

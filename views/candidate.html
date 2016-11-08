@@ -36,20 +36,64 @@
   </head>
   <body>
 
-<!-- <div id="yourCanvas">
-  <img src="../img/leo.jpg" alt="" />
-
-</div> -->
-<!-- <div id="container"></div> -->
-  <div class="container">
+  <div class="container" id="candidate-container">
     <img src="../img/candidate.gif" id="candidate-gif" alt="" />
     <h1 class="centered-type">Current Candidate</h1>
 
-    <div class="row" id="people-holder">
-
-      </div>
     </div>
-  </div>
+
+  <div id="three-canvas" width="300" height="600">hi</div>
+  <div class="container">
+		<div class="row">
+			<div class="col-md-3">
+        <form method="post" action="/api/quiz" id="myForm">
+
+
+          <div class="form-group">
+            <!-- <label for="name">Name</label> -->
+            	<h1>PHILANTHROPY</h1>
+              <p>What perentage of your income do you donate annually?</p>
+            <input type="text" class="form-control" id="philanthropy" placeholder="" name="philanthropy">
+          </div>
+
+
+          <div class="form-group">
+            <!-- <label for="name">Name</label> -->
+                <h1>CAREER CHOICE</h1>
+              <p>Are you a banker?</p>
+            <input type="text" class="form-control" id="banker" placeholder="" name="banker">
+          </div>
+
+            <div class="form-group">
+              <!-- <label for="name">Name</label> -->
+                  <h1>INTELLIGENCE</h1>
+                  <p>
+                    Login to Github
+                  </p>
+                  <p>
+                    Don't have github? Can you at least answer this question?
+                  </p>
+                  <p>
+                    insert word problem here
+                  </p>
+              <input type="text" class="form-control" id="intelligence" placeholder="" name="intelligence">
+            </div>
+
+
+            <div class="form-group">
+              <!-- <label for="name">Name</label> -->
+                  <h1>ACTIVISM</h1>
+                  <p>Name one organization or cause that you have donated time or money to, in the last year?
+                  </p>
+              <input type="text" class="form-control" id="activism" placeholder="" name="activism">
+            </div>
+
+        </form>
+
+     </div>   <!--col -->
+   </div>  <!--row -->
+ </div>  <!--container -->
+
 
 </body>
 

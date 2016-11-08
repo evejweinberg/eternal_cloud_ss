@@ -39,7 +39,7 @@ init()
 
 
 
-
+var canvas = document.getElementById('three-canvas')
 
 var person, personFull;
 var group = new THREE.Group();
@@ -58,6 +58,8 @@ var group = new THREE.Group();
 
       renderer.setSize( window.innerWidth, window.innerHeight );
       document.body.appendChild(renderer.domElement);
+
+      // canvas.appendChild(renderer.domElement);
 
 
     // create a scene
@@ -96,11 +98,11 @@ var group = new THREE.Group();
 
 
     //does one cube load? YES!
-    // var geo = new THREE.BoxGeometry(130,30,30)
-    // var mat = new THREE.MeshBasicMaterial({color: 0xb2b7b7})
-    // mesh = new THREE.Mesh(geo, material1)
-    // scene.add(mesh)
-    // mesh.position.z = -80
+    var geo = new THREE.BoxGeometry(130,30,30)
+    var mat = new THREE.MeshBasicMaterial({color: 0xb2b7b7})
+    mesh = new THREE.Mesh(geo, material1)
+    scene.add(mesh)
+    mesh.position.z = -80
 
     composer = new THREE.EffectComposer( renderer );
     composer.addPass( new THREE.RenderPass( scene, camera ) );
