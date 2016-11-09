@@ -514,7 +514,7 @@ router.get('/directory', function(req,res){
 })
 
 
-router.post('/third', function(req,res){
+router.get('/third', function(req,res){
   res.render('blank.html')
 })
 
