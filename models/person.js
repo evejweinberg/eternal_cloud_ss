@@ -8,6 +8,12 @@ var personSchema = new Schema({
 	imageUrl: String,
 	slug : { type: String, lowercase: true, required: true, unique: true },
 
+	//philanthropy: Number,
+	//banker: boolean,
+	//intelligence: Number,
+	//activism: Number
+
+
 	dateAdded : { type: Date, default: Date.now }
 })
 

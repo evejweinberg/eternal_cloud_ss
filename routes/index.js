@@ -515,7 +515,11 @@ router.get('/directory', function(req,res){
 
 
 router.get('/third', function(req,res){
+  // if ()
   res.render('blank.html')
+  // else{
+  // res.render('/candidate-solo.html')
+// }
 })
 
 

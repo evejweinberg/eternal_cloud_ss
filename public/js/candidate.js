@@ -72,7 +72,7 @@ var group = new THREE.Group();
     scene.add(camera);
 
     // create a camera contol
-    cameraControls	= new THREE.TrackballControls( camera )
+    // cameraControls	= new THREE.TrackballControls( camera )
 
 
     // LOTS OF LIGHTS
@@ -138,7 +138,7 @@ var group = new THREE.Group();
     var PIseconds	= Date.now() * Math.PI;
 
     // update camera controls
-    cameraControls.update();
+    // cameraControls.update();
 
     // animation of all objects
     scene.traverse(function(object3d, i){

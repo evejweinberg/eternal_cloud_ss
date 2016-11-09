@@ -30,6 +30,17 @@
     <!-- Custom CSS inside CSS folder -->
     <link  href="css/make-profile.css" rel="stylesheet"/>
 
+    <style media="screen">
+      canvas{
+        z-index: -10;
+position: absolute;
+top: 0px;
+left: 0px;
+width: 769px;
+height: 699px;
+      }
+    </style>
+
 
 
   </head>
@@ -41,26 +52,30 @@
 
     </div>
 
-  <div id="three-canvas" width="300" height="600">hi</div>
-  <div class="container">
+  <!-- <div id="three-canvas" width="300" height="600">hi</div> -->
+  <div class="container" id="full-form">
 		<div class="row">
 			<div class="col-md-3">
         <form method="post" action="/api/quiz" id="myForm">
-
 
           <div class="form-group">
             <!-- <label for="name">Name</label> -->
             	<h1>PHILANTHROPY</h1>
               <p>What perentage of your income do you donate annually?</p>
-            <input type="text" class="form-control" id="philanthropy" placeholder="" name="philanthropy">
+            <input type="number" min='0' max='100' step='1' class="form-control" id="philanthropy" placeholder="10" name="philanthropy">
           </div>
 
+          <button type="submit" class="btn btn-default">Submit</button>
 
+
+</form>
+      <form method="post" action="/api/quiz" id="myForm">
           <div class="form-group">
             <!-- <label for="name">Name</label> -->
                 <h1>CAREER CHOICE</h1>
               <p>Are you a banker?</p>
-            <input type="text" class="form-control" id="banker" placeholder="" name="banker">
+              <input type="radio" name="banker" id="banker-y" value="yes" checked> Yes<br>
+              <input type="radio" name="banker" id="banker-n" value="no"> No<br>
           </div>
 
             <div class="form-group">
