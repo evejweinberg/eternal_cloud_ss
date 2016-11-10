@@ -14,7 +14,7 @@
 		<script src="js/three.js/Stats.js"></script>
 
 		<script src="js/threex/THREEx.screenshot.js"></script>
-		<script src="js/threex/THREEx.FullScreen.js"></script>
+		<!-- <script src="js/threex/THREEx.FullScreen.js"></script> -->
 		<script src="js/threex/THREEx.WindowResize.js"></script>
 		<script src="js/three.js/TrackballControls.js"></script>
 		<script src="js/webcam.js"></script>
@@ -115,12 +115,12 @@
 			// transparently support window resize
 			THREEx.WindowResize.bind(renderer, camera);
 			// allow 'p' to make screenshot
-			THREEx.Screenshot.bindKey(renderer);
+			// THREEx.Screenshot.bindKey(renderer);
 			// allow 'f' to go fullscreen where this feature is supported
-			if( THREEx.FullScreen.available() ){
-				THREEx.FullScreen.bindKey();
-				// document.getElementById('inlineDoc').innerHTML	+= "- <i>f</i> for fullscreen";
-			}
+			// if( THREEx.FullScreen.available() ){
+			// 	THREEx.FullScreen.bindKey();
+			// 	// document.getElementById('inlineDoc').innerHTML	+= "- <i>f</i> for fullscreen";
+			// }
 
 			// here you add your objects
 			// - you will most likely replace this part by your own
@@ -176,7 +176,7 @@
 				object3d.rotation.x = PIseconds*0.0001 * (i % 2 ? 1 : -1);
 			})
 
-			// actually render the scene
+			// render the scene
 			renderer.render( scene, camera );
 		}//render over
 
@@ -198,13 +198,11 @@
 			// take snapshot and get image data
 			Webcam.snap( function(data_uri) {
 
-				// console.log('setting the global blob');
+				// setting the global blob
 				globalBlob = data_uri;
-				// console.log ('data uri: ' + data_uri);
 				newImage = data_uri;
 				var newImageB = new Image()
 				newImageB.src = data_uri;
-				// console.log(newImageB);
 				// we need to send this to AWS
 
 				//push image to 3D cube
@@ -227,7 +225,7 @@
 
 		function uploadBlob()
 		{
-			console.log('uploading Blob');
+			// console.log('uploading Blob with ajax request');
 
 			//make a new javascript native blob
 		 var blob = new Blob();
@@ -245,15 +243,16 @@
 				//  console.log('fd is: ' , fd)
 		     $.ajax({
 		         type: 'POST',
+						 //hit this route
 		         url: './submitProfile',
 		         data: fd,
 		         processData: false,
 		         contentType: false
 		     }).done(function(data) {
-		        //  console.log(data);
 						//if the status from the backend is 'OK' then do this
-						//change it on both sides if you change the string
+						//change it on both sides if you change the string 'ok'
 		         if (data.status == 'OK') {
+							 //replace this with a new route
 							  window.location = '/candidate';
 						 } else {
 							 console.log('data was not OK')
@@ -287,23 +286,12 @@
 					<div class="form-group">
 						<label for="name">Name</label>
 						<input type="text" class="form-control" id="name" placeholder="Name" name="name">
-						<p class="help-block">Your name is an identifying string given to you at birth</p>
+						<!-- <p class="help-block">Your name is an identifying string given to you at birth</p> -->
 					</div>
 						<!-- A button for taking snaps of the webcam // pushing resuly to the console log -->
-						<input type=button value="Take Snapshot" onClick="take_snapshot()">
-
-						<!-- //Now, create a file input (notice the type below): Is this going to my schema? -->
-						<!-- is this going straight to AMazon? Where is this going? -->
-						<!-- <input type="file" name="imageUrl" id="image" value="Select a Photo"> -->
+						<input type=button class="btn" value="Take Snapshot" onClick="take_snapshot()">
 
 
-					<!-- //the first way Sam showed us as a text field input -->
-					<!-- <div class="form-group">
-						<label for="imageUrl">ImageURL</label>
-						<input type="text" class="form-control" id="imageUrl" placeholder="imageUrl" name="imageUrl" >
-					</div> -->
-
-					<!-- <button type="submit" class="btn btn-default">Submit</button> -->
 				</form>
 			</div>
 		</div>
@@ -311,12 +299,7 @@
 
 	<br>
 
-	<div class="progress" style="width:40%">
-	<div class="progress-bar progress-bar-success progress-bar-striped" role="progressbar"
-	aria-valuenow="20" aria-valuemin="0" aria-valuemax="100" style="width:20%">
-		1/6 completed
-	</div>
-</div>
+
 
 
 </body>

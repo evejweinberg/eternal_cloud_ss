@@ -15,6 +15,14 @@ body {
 	font-size	: 100%;
 }
 
+h2{
+	color: pink;
+}
+
+p{
+	font-size: 20px;
+}
+
 #candidate-gif{
 	width: 220px;
 	margin: auto;
@@ -63,6 +71,6 @@ body {
 
 #candidate-container{
 	float: left;
-	width: 200px;
+	/*width: 200px;*/
 
 }

@@ -9,9 +9,9 @@ var personSchema = new Schema({
 	slug : { type: String, lowercase: true, required: true, unique: true },
 
 	philanthropy: Number,
-	banker: Boolean,
-	intelligence: Number,
-	activism: Number,
+	career: Boolean,
+	intelligence: String,
+	activism: String,
 
 
 	dateAdded : { type: Date, default: Date.now }

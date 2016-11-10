@@ -164,15 +164,14 @@ var group = new THREE.Group();
 
 
 
-//get thr person from the database
+//get the person from the database
 
   	jQuery.ajax({
   		url : '/api/get',
   		dataType : 'json',
   		success : function(response) {
-  			console.log(response.people);
+  			// console.log(response.people);
   			var person = response.people[response.people.length-1];
-        console.log(person)
         personId = person._id;
         console.log('we are updating person with ID ' + personId);
         var loader = new THREE.TextureLoader();
@@ -181,7 +180,6 @@ var group = new THREE.Group();
 
 
           if (person.imageUrl.includes('eternalcloudbucket')){
-            console.log('valid image')
 
             //create a loader
             var loader2 = new THREE.TextureLoader();
@@ -190,7 +188,7 @@ var group = new THREE.Group();
           }
 
         function  textureLoaded(texture){
-              console.log(texture)
+              // console.log(texture)
             var video_mat = new THREE.MeshPhongMaterial({
                 color: 0xb7b7b7,
                 map: texture
@@ -255,9 +253,6 @@ var group = new THREE.Group();
 
     group.add(type)
 
-    // console.log(type)
-    // return type;
-
 
   }); //font over
 }//font loader funcyion over
@@ -267,10 +262,10 @@ window.addEventListener('resize', onResize, true);
 
 function onResize(e) {
     camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
+    camera.updateProjectionMatrix();
       // renderer.setSize( window.innerWidth, window.innerHeight*ThreeSceneHghtRation );
-        renderer.setSize( window.innerWidth, window.innerHeight);
-        	composer.setSize( window.innerWidth, window.innerHeight );
+    renderer.setSize( window.innerWidth, window.innerHeight);
+    composer.setSize( window.innerWidth, window.innerHeight );
 }
 
 
@@ -290,7 +285,7 @@ jQuery("#candidateForm").submit(function(e){
 	  		// success
 	  		console.log(response);
 	  		// now, clear the input fields
-	  		jQuery("#candidateForm input").val('');
+	  		// jQuery("#candidateForm input").val('');
   	},
   	error : function(err){
   		// do error checking
@@ -302,5 +297,117 @@ jQuery("#candidateForm").submit(function(e){
   // prevents the form from submitting normally
   e.preventDefault();
   return false;
-  
+
+})
+
+
+
+
+jQuery("#CareerForm").submit(function(e){
+  var career = $(".career:checked").val();
+  // console.log(career + '  is value of career')
+  // console.log('updating career of person: '+ personId)
+
+  jQuery.ajax({
+  	url : '/api/update/'+personId,
+  	dataType : 'json',
+  	type : 'POST',
+  	// we send the data in a data object (with key/value pairs)
+  	data : {
+  		career: career,
+  	},
+  	success : function(response){
+	  		// success
+	  		console.log(response);
+	  		// now, clear the input fields
+	  		// jQuery("#candidateForm input").val('');
+  	},
+  	error : function(err){
+  		// do error checking
+  		alert("something went wrong");
+  		console.error(err);
+  	}
+  });
+
+  // prevents the form from submitting normally
+  e.preventDefault();
+  return false;
+
+})
+
+
+
+jQuery("#ActivismForm").submit(function(e){
+//split this
+      var activism = $("#activism").val();
+
+
+  jQuery.ajax({
+  	url : '/api/update/'+personId,
+  	dataType : 'json',
+  	type : 'POST',
+  	// we send the data in a data object (with key/value pairs)
+  	data : {
+  		activism: activism,
+  	},
+  	success : function(response){
+	  		// success
+	  		console.log(response);
+	  		// now, clear the input fields
+	  		// jQuery("#candidateForm input").val('');
+  	},
+  	error : function(err){
+  		// do error checking
+  		alert("something went wrong");
+  		console.error(err);
+  	}
+  });
+
+  // prevents the form from submitting normally
+  e.preventDefault();
+  return false;
+
+})
+
+
+
+
+jQuery("#IntelligenceForm").submit(function(e){
+  console.log(typeof $("#intelligence").val())
+  // if (typeof $("#intelligence").val() === String){
+      var intelligence = $("#intelligence").val();
+      // console.log(intelligence + 'is the intelligence')
+  // } else {
+    // intelligence = "null"
+    // console.log(intelligence + 'is the intelligence')
+  // }
+
+  // console.log(career + '  is value of career')
+  // console.log('updating career of person: '+ personId)
+
+  jQuery.ajax({
+  	url : '/api/update/'+personId,
+  	dataType : 'json',
+  	type : 'POST',
+  	// we send the data in a data object (with key/value pairs)
+  	data : {
+  		intelligence: intelligence,
+  	},
+  	success : function(response){
+	  		// success
+	  		// console.log(response);
+	  		// now, clear the input fields
+	  		// jQuery("#candidateForm input").val('');
+  	},
+  	error : function(err){
+  		// do error checking
+  		alert("something went wrong");
+  		console.error(err);
+  	}
+  });
+
+  // prevents the form from submitting normally
+  e.preventDefault();
+  return false;
+
 })

@@ -118,7 +118,6 @@ router.post('/submitProfile', upload.single('file'), function(req,res){
     var buf = new Buffer(req.body.data, 'base64');
 
 
-
     AWS.config.update({
 
       accessKeyId:process.env.AWS_ACCESS_KEY,
@@ -367,8 +366,8 @@ router.post('/api/create', function(req,res){
   console.log('in api/create, and we got data');
   console.log(req.body);
 
-  if (req.body.banker == 'yes') personObj['hasGlasses'] = true;
-  else personObj['hasGlasses'] = false;
+  if (req.body.career == 'yes') personObj['career'] = true;
+  else personObj['career'] = false;
 
   if (!req.body.philanthropy)req.body.philanthropy = 0
   if (!req.body.intelligence)req.body.intelligence = 0
@@ -381,7 +380,7 @@ router.post('/api/create', function(req,res){
     name: req.body.name,
     imageUrl: req.body.imageUrl,
     philanthropy: req.body.philanthropy,
-    banker: req.body.banker,
+    career: req.body.career,
     intelligence: req.body.intelligence,
     activism: req.body.activism,
     //create a uniqur slug
@@ -402,7 +401,7 @@ router.post('/api/create', function(req,res){
       }
       // return res.json(err)
       res.redirect('/candidate')
-      //redirect /third to /candidate
+      //redirect /third to /candidate-solo
     }
 
     var jsonData = {
@@ -550,17 +549,27 @@ router.get('/third', function(req,res){
 // }
 })
 
+
 router.post('/api/update/:id', function(req,res){
   var idToUpdate = req.params.id;
 
-  console.log(idToUpdate);
+  // console.log(idToUpdate);
   var dataToUpdate = {};
 
   if(req.body.philanthropy) dataToUpdate.philanthropy = req.body.philanthropy;
+  if(req.body.career) console.log(req.body.career); dataToUpdate.career = req.body.career;
+  if(req.body.intelligence) dataToUpdate.intelligence = req.body.intelligence;
+  if(req.body.activism) dataToUpdate.activism = req.body.activism;
+
+
+
 
   Person.findByIdAndUpdate(idToUpdate, dataToUpdate, function(err,data){
-    // do error handling
-    res.json(data);
+    if (err){
+      alert("There was an error updating your profile. Eternal Cloud might be at maximum capacity.")
+    } else{
+        res.json(data);
+    }
   });
 
 })
