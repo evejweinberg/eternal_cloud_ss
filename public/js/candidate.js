@@ -8,6 +8,8 @@ var camera, cameraControls, material1, mesh;
 var movePeopleDown = 120;
 var loader2;
 
+var personId; // we will use this to know which person to update
+
 //COLORS
 var pink = 0xfebdb7;
 var teal =  0x009fc6;
@@ -171,6 +173,8 @@ var group = new THREE.Group();
   			console.log(response.people);
   			var person = response.people[response.people.length-1];
         console.log(person)
+        personId = person._id;
+        console.log('we are updating person with ID ' + personId);
         var loader = new THREE.TextureLoader();
         // console.log(person)
           var video_geo = new THREE.BoxGeometry( boxSize,boxSize,boxSize );
@@ -268,3 +272,35 @@ function onResize(e) {
         renderer.setSize( window.innerWidth, window.innerHeight);
         	composer.setSize( window.innerWidth, window.innerHeight );
 }
+
+
+
+jQuery("#candidateForm").submit(function(e){
+  var philanthropy = parseInt($('#philanthropy').val());
+
+  jQuery.ajax({
+  	url : '/api/update/'+personId,
+  	dataType : 'json',
+  	type : 'POST',
+  	// we send the data in a data object (with key/value pairs)
+  	data : {
+  		philanthropy: philanthropy,
+  	},
+  	success : function(response){
+	  		// success
+	  		console.log(response);
+	  		// now, clear the input fields
+	  		jQuery("#candidateForm input").val('');
+  	},
+  	error : function(err){
+  		// do error checking
+  		alert("something went wrong");
+  		console.error(err);
+  	}
+  });
+
+  // prevents the form from submitting normally
+  e.preventDefault();
+  return false;
+  
+})

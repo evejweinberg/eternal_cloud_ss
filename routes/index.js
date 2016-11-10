@@ -550,6 +550,21 @@ router.get('/third', function(req,res){
 // }
 })
 
+router.post('/api/update/:id', function(req,res){
+  var idToUpdate = req.params.id;
+
+  console.log(idToUpdate);
+  var dataToUpdate = {};
+
+  if(req.body.philanthropy) dataToUpdate.philanthropy = req.body.philanthropy;
+
+  Person.findByIdAndUpdate(idToUpdate, dataToUpdate, function(err,data){
+    // do error handling
+    res.json(data);
+  });
+
+})
+
 
 
 
