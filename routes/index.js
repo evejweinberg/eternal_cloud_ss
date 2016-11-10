@@ -126,7 +126,7 @@ router.post('/submitProfile', upload.single('file'), function(req,res){
     });
     AWS.config.update({region: 'us-east-1'})
 
-    var s3 = new AWS.S3({params: {Bucket: awsBucketName, ACL: 'public-read'}});
+    var s3bucket = new AWS.S3({params: {Bucket: process.env.AWS_BUCKET_NAME}});
 
     // var s3 = new AWS.S3({params: {Bucket: awsBucketName}});
 
@@ -135,27 +135,47 @@ router.post('/submitProfile', upload.single('file'), function(req,res){
 
 
     var params = {
-      Bucket: 'eternaltest',
+      //Bucket: process.env.AWS_BUCKET_NAME,
       Key: tempName,
       ACL: 'public-read',
-      Body: buf
+      Body: buf,
+      ContentType: "image/jpeg"
     };
 
 
-    s3.upload(params, function(err,data){
+    s3bucket.putObject(params, function(err,data){
       if(err) console.log(err);
       else console.log('success@');
     });
 
     // res.json({msg: "success!"});
 
-    var publicUrl = 'https://s3.amazonaws.com/eternaltest/' + tempName;
+    var publicUrl = process.env.AWS_S3_PATH + tempName;
     console.log('public url: ' + publicUrl);
+
+      console.log(req.body)
+
+
+    // if (req.body.banker == 'yes') personObj['banker'] = true;
+    // else personObj['banker'] = false;
+    //
+    // if (req.body.philanthropy === null )req.body.philanthropy = 0
+    // if (req.body.intelligence === null )req.body.intelligence = 0
+    // if (req.body.activism === null )req.body.activism = 0
+
+
+
+
+
 
     var personObj = {
       //grab your mongood schema and double it here
       name: req.body.name,
       imageUrl: publicUrl,
+      // philanthropy: req.body.philanthropy,
+      // banker: req.body.banker,
+      // intelligence: req.body.intelligence,
+      // activism: req.body.activism,
       //create a uniqur slug
       slug : req.body.name.toLowerCase().replace(/[^\w ]+/g,'').replace(/ +/g,'-')
     }
@@ -285,28 +305,25 @@ router.post('/api/create/image', multipartMiddleware, function(req,res){
 
 
 
-function cleanFileName (filename) {
-
-    // cleans and generates new filename for example userID=abc123 and filename="My Pet Dog.jpg"
-    // will return "abc123_my_pet_dog.jpg"
-    var fileParts = filename.split(".");
-
-    //get the file extension
-    var fileExtension = fileParts[fileParts.length-1]; //get last part of file
-
-    //add time string to make filename a little more random
-    d = new Date();
-    timeStr = d.getTime();
-
-    //name without extension
-    newFileName = fileParts[0];
-
-    return newFilename = timeStr + "_" + fileParts[0].toLowerCase().replace(/[^\w ]+/g,'').replace(/ +/g,'_') + "." + fileExtension;
-
-}
-
-
-
+// function cleanFileName (filename) {
+//
+//     // cleans and generates new filename for example userID=abc123 and filename="My Pet Dog.jpg"
+//     // will return "abc123_my_pet_dog.jpg"
+//     var fileParts = filename.split(".");
+//
+//     //get the file extension
+//     var fileExtension = fileParts[fileParts.length-1]; //get last part of file
+//
+//     //add time string to make filename a little more random
+//     d = new Date();
+//     timeStr = d.getTime();
+//
+//     //name without extension
+//     newFileName = fileParts[0];
+//
+//     return newFilename = timeStr + "_" + fileParts[0].toLowerCase().replace(/[^\w ]+/g,'').replace(/ +/g,'_') + "." + fileExtension;
+//
+// }
 
 
 
@@ -350,12 +367,23 @@ router.post('/api/create', function(req,res){
   console.log('in api/create, and we got data');
   console.log(req.body);
 
+  if (req.body.banker == 'yes') personObj['hasGlasses'] = true;
+  else personObj['hasGlasses'] = false;
+
+  if (!req.body.philanthropy)req.body.philanthropy = 0
+  if (!req.body.intelligence)req.body.intelligence = 0
+  if (!req.body.activism)req.body.activism = 0
+
 
 //save a data object
   var personObj = {
     //grab your mongood schema and double it here
     name: req.body.name,
     imageUrl: req.body.imageUrl,
+    philanthropy: req.body.philanthropy,
+    banker: req.body.banker,
+    intelligence: req.body.intelligence,
+    activism: req.body.activism,
     //create a uniqur slug
     slug : req.body.name.toLowerCase().replace(/[^\w ]+/g,'').replace(/ +/g,'-')
   }

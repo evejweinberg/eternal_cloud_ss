@@ -168,14 +168,15 @@ var group = new THREE.Group();
   		url : '/api/get',
   		dataType : 'json',
   		success : function(response) {
-  			// console.log(response.people[response.people.length-1].imageUrl);
+  			console.log(response.people);
   			var person = response.people[response.people.length-1];
+        console.log(person)
         var loader = new THREE.TextureLoader();
         // console.log(person)
           var video_geo = new THREE.BoxGeometry( boxSize,boxSize,boxSize );
 
 
-          if (person.imageUrl.includes('eternaltest')){
+          if (person.imageUrl.includes('eternalcloudbucket')){
             console.log('valid image')
 
             //create a loader
